@@ -1,4 +1,4 @@
-name: Tests unitaires JavaScript
+name: CI - Tests et Documentation
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Tests unitaires
     runs-on: ubuntu-latest
 
     steps:
@@ -24,3 +25,29 @@ jobs:
 
       - name: Lancer les tests Jest
         run: npm test
+
+  docs:
+    name: Génération de documentation
+    runs-on: ubuntu-latest
+    needs: test  # attendre que les tests passent avant de générer la doc
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Installer JSDoc
+        run: npm install -g jsdoc
+
+      - name: Générer la documentation
+        run: jsdoc -c jsdoc.json -r -d docs src
+
+      - name: Publier la documentation
+        uses: peaceiris/actions-gh-pages@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
