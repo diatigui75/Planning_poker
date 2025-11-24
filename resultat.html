@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Poker - Résultats des Votes</title>
+    <link rel="stylesheet" href="resultat.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Planning Poker</h1>
+            <p>Bienvenue sur Planning Poker</p>
+        </div>
+
+        <div class="session-info">
+            <p>Session: JHB</p>
+            <p>Résultats des Votes</p>
+        </div>
+
+        <div class="votes-section">
+            <h3>Votes des Joueurs</h3>
+            <div class="votes-container">
+                <div class="vote-card">
+                    <p class="player-name">Joueur 1</p>
+                    <div class="card voted" data-value="5"></div>
+                </div>
+                <div class="vote-card">
+                    <p class="player-name">Joueur 2</p>
+                    <div class="card voted" data-value="8"></div>
+                </div>
+                <div class="vote-card">
+                    <p class="player-name">Joueur 3</p>
+                    <div class="card voted" data-value="3"></div>
+                </div>
+                <div class="vote-card">
+                    <p class="player-name">Joueur 4</p>
+                    <div class="card voted" data-value="8"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h3>Résultat</h3>
+            <p id="result-value">Calcul en cours...</p>
+            <p id="rule-used">Règle: Unanimité</p>
+        </div>
+
+        <button class="new-vote-button">Nouveau Vote</button>
+    </div>
+
+</body>
+
+</html>

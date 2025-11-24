@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Poker - Créer une Session</title>
+    <link rel="stylesheet" href="session.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Planning Poker</h1>
+            <p>Bienvenue sur Planning Poker</p>
+        </div>
+
+        <h2>Créer une Session</h2>
+
+        <form class="form-container">
+            <div class="form-group">
+                <label for="sessionName">Nom de la Session</label>
+                <input type="text" id="sessionName" placeholder="Ex: Sprint 10 Planning">
+            </div>
+
+            <div class="form-group">
+                <label for="scrumMaster">Votre Nom (Scrum Master)</label>
+                <input type="text" id="scrumMaster" placeholder="Votre pseudo">
+            </div>
+
+            <div class="form-group">
+                <label for="voteRule">Règle de Vote</label>
+                <select id="voteRule">
+                    <option value="unanimity">Unanimité</option>
+                    <option value="majority">Majorité</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="timerDuration">Durée du Chronomètre (secondes)</label>
+                <input type="number" id="timerDuration" value="60">
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="create-session-button">Créer la Session</button>
+                <button type="button" class="return-button">Retour</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

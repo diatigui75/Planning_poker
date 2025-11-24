@@ -1,0 +1,149 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #6e48aa, #9d50bb);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 500px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.header h1 {
+    color: #4a4a9e;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.session-info {
+    background-color: #6e48aa;
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.waiting-section {
+    background-color: #f0f4ff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.waiting-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.estimation-section {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.estimation-section p {
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    width: 50px;
+    height: 70px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-size: cover;
+    background-position: center;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Images des cartes */
+.card[data-value="0"] {
+    background-image: url('cartes_0.svg');
+}
+
+.card[data-value="1"] {
+    background-image: url('cartes_1.svg');
+}
+
+.card[data-value="2"] {
+    background-image: url('cartes_2.svg');
+}
+
+.card[data-value="3"] {
+    background-image: url('cartes_3.svg');
+}
+
+.card[data-value="5"] {
+    background-image: url('cartes_5.svg');
+}
+
+.card[data-value="8"] {
+    background-image: url('cartes_8.svg ');
+}
+
+.card[data-value="13"] {
+    background-image: url('cartes_13.svg');
+}
+
+.card[data-value="21"] {
+    background-image: url('cartes_20.svg');
+}
+
+.card[data-value="?"] {
+    background-image: url('cartes_40.svg');
+}
+
+.card[data-value="?"] {
+    background-image: url('cartes_100.svg');
+}
+
+.card[data-value="?"] {
+    background-image: url('cartes_cafe.svg');
+}
+
+.card[data-value="?"] {
+    background-image: url('cartes_interro.svg');
+}
+
+.leave-session-button {
+    background-color: #7f8c8d;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+.leave-session-button:hover {
+    background-color: #6c7a7d;
+}
