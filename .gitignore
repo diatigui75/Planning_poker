@@ -1,0 +1,25 @@
+# Dépendances
+/vendor/
+node_modules/
+
+# Configuration locale
+/config/config.php
+.env
+
+# Fichiers générés
+/docs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+/tests/coverage/
+.phpunit.result.cache
