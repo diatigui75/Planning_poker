@@ -203,6 +203,65 @@ function displayRevealModal(data) {
 }
 
 /**
+ * Afficher le modal de révélation en lecture seule (pour les joueurs non-SM)
+ */
+function displayRevealModalReadOnly(data) {
+    const modal = document.getElementById('reveal-modal');
+    const content = document.getElementById('reveal-content');
+    
+    // Bloquer le polling automatique pendant que le modal est ouvert
+    isModalOpen = true;
+    
+    let html = '<div class="votes-reveal">';
+    html += '<h4>🔍 Votes révélés</h4>';
+    html += '<div class="votes-grid">';
+    
+    data.votes.forEach(vote => {
+        html += `
+            <div class="vote-card">
+                <div class="vote-value">${vote.vote_value}</div>
+                <div class="vote-player">${vote.pseudo}</div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    // Afficher le résultat du vote si disponible
+    if (data.result) {
+        if (data.result.valid) {
+            html += `
+                <div class="result-box success">
+                    <h4>✅ ${data.result.reason}</h4>
+                    <p class="result-value">Estimation proposée: <strong>${data.result.value}</strong> points</p>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="result-box warning">
+                    <h4>⚠️ ${data.result.reason}</h4>
+                    <p>Discussion nécessaire avant de continuer.</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Message d'attente pour les joueurs
+    html += `
+        <div class="result-box info" style="margin-top: 16px;">
+            <h4>⏳ En attente de la décision du Scrum Master</h4>
+            <p>Le Scrum Master évalue les résultats et décidera de valider l'estimation ou de relancer un vote.</p>
+        </div>
+    `;
+    
+    html += '</div>';
+    
+    content.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+
+/**
  * Valider l'estimation
  */
 async function validateEstimation(estimation) {
@@ -456,22 +515,41 @@ async function updateSessionState() {
                 lastStoryId = null;
             }
             
-            // STATUS RÉVÉLÉ → Afficher le modal pour le SM uniquement
+            // STATUS RÉVÉLÉ → Afficher le modal pour tous
             if (statusChanged && data.session.status === 'revealed' && !isInitialLoad && !isModalOpen) {
+                console.log('Statut revealed détecté, affichage de la modale pour tous');
+                
                 if (isScrumMaster) {
-                    // Le SM vient de révéler, afficher le modal
-                    // (cela sera géré par la fonction revealVotes)
+                    // Le SM a déjà sa modale via revealVotes(), ne rien faire ici
                 } else {
-                    // Les autres joueurs attendent
-                    showNotification('⏳ Le Scrum Master évalue les votes...', 'info');
+                    // Afficher la modale en lecture seule pour les joueurs avec les données actuelles
+                    if (data.vote_info && data.vote_info.votes) {
+                        const revealData = {
+                            votes: data.vote_info.votes,
+                            result: data.vote_result || null
+                        };
+                        displayRevealModalReadOnly(revealData);
+                    }
                 }
             }
             
-            // RETOUR EN VOTING (revote)
+            // RETOUR EN VOTING (revote) → Fermer la modale pour tous
             if (statusChanged && data.session.status === 'voting' && !isInitialLoad) {
                 console.log('Revote détecté');
+                
+                // Fermer la modale si elle est ouverte
+                if (isModalOpen) {
+                    closeRevealModal();
+                }
+                
                 resetVotingInterface();
                 showNotification('🔄 Nouveau tour de vote !', 'warning');
+            }
+            
+            // VALIDATION DÉTECTÉE (passage à waiting ou finished) → Fermer la modale
+            if (statusChanged && (data.session.status === 'waiting' || data.session.status === 'finished') && isModalOpen && !isInitialLoad) {
+                console.log('Validation détectée, fermeture de la modale');
+                closeRevealModal();
             }
             
             // Mise à jour du compteur de votes
@@ -518,6 +596,22 @@ function updateVoteCount(voteInfo) {
             voteCounter.style.animation = 'pulse 0.5s';
             setTimeout(() => {
                 voteCounter.style.animation = '';
+            }, 500);
+        }
+    }
+    
+    // Mettre à jour le compteur dans les métadonnées de la story
+    const voteCounterMeta = document.getElementById('vote-counter-meta');
+    if (voteCounterMeta) {
+        const oldCount = parseInt(voteCounterMeta.textContent) || 0;
+        const newCount = voteInfo.votes_count || 0;
+        
+        if (newCount !== oldCount) {
+            voteCounterMeta.textContent = newCount;
+            // Animation du compteur
+            voteCounterMeta.style.animation = 'pulse 0.5s';
+            setTimeout(() => {
+                voteCounterMeta.style.animation = '';
             }, 500);
         }
     }
@@ -666,7 +760,7 @@ function updateProgressBar(stats) {
     
     const percentage = (stats.estimated / stats.total) * 100;
     const progressBar = document.querySelector('.progress-bar');
-    const progressText = document.getElementById('progress-text');
+    const progressInfo = document.querySelector('.progress-info span');
     
     if (progressBar) {
         // Animer le changement
@@ -674,14 +768,15 @@ function updateProgressBar(stats) {
         progressBar.style.width = percentage + '%';
     }
     
-    if (progressText) {
-        const newText = `${stats.estimated}/${stats.total}`;
-        if (progressText.textContent !== newText) {
-            progressText.textContent = newText;
+    // Mettre à jour le texte de progression
+    if (progressInfo) {
+        const newText = `Progression: ${stats.estimated}/${stats.total} stories estimées`;
+        if (progressInfo.textContent !== newText) {
+            progressInfo.textContent = newText;
             // Animation
-            progressText.style.animation = 'pulse 0.5s';
+            progressInfo.style.animation = 'pulse 0.5s';
             setTimeout(() => {
-                progressText.style.animation = '';
+                progressInfo.style.animation = '';
             }, 500);
         }
     } else {
@@ -730,7 +825,7 @@ function showProgressSection(stats) {
         
         progressContainer.innerHTML = `
             <div class="progress-info">
-                <span>Progression: <span id="progress-text">${stats.estimated}/${stats.total}</span> stories estimées</span>
+                <span>Progression: ${stats.estimated}/${stats.total} stories estimées</span>
             </div>
             <div class="progress-bar-container">
                 <div class="progress-bar" style="width: ${(stats.estimated / stats.total) * 100}%"></div>
@@ -741,9 +836,9 @@ function showProgressSection(stats) {
         playersSection.insertAdjacentElement('beforebegin', progressContainer);
     } else {
         // Mettre à jour la progression existante
-        const progressText = document.getElementById('progress-text');
-        if (progressText) {
-            progressText.textContent = `${stats.estimated}/${stats.total}`;
+        const progressInfo = progressContainer.querySelector('.progress-info span');
+        if (progressInfo) {
+            progressInfo.textContent = `Progression: ${stats.estimated}/${stats.total} stories estimées`;
         }
         
         // Mettre à jour la barre

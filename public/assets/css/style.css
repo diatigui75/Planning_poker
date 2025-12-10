@@ -1124,6 +1124,12 @@ form a.btn-back {
     color: var(--gray-90);               /* Texte gris foncé */
 }
 
+.result-box.info {
+    background: var(--gray-10);          /* Gris très clair */
+    border-color: var(--gray-50);        /* Bordure gris moyen-clair */
+    color: var(--gray-90);               /* Texte gris foncé */
+}
+
 .result-box h4 {
     font-weight: 600;
     margin-bottom: 8px;
@@ -1164,8 +1170,7 @@ form a.btn-back {
 }
 
 .notification-warning {
-    background: var(--warning-color);
-    color: var(--text-primary);
+    background: var(--primary-color);
 }
 
 .notification-info {

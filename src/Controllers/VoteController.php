@@ -153,6 +153,7 @@ class VoteController
         $stats = UserStory::getStats($pdo, $sessionId);
 
         $voteInfo = ['votes_count' => 0, 'has_voted' => false, 'votes' => []];
+        $voteResult = null;
         
         if ($story) {
             $votes = Vote::getVotes($pdo, $sessionId, $story->id, 1);
@@ -164,6 +165,12 @@ class VoteController
                 'has_voted' => $hasVoted,
                 'votes' => $votes,
             ];
+            
+            // Si le statut est 'revealed', calculer le résultat du vote
+            if ($session->status === 'revealed' && count($votes) > 0) {
+                $voteValues = array_column($votes, 'vote_value');
+                $voteResult = VoteRulesService::computeResult($voteValues, $session->vote_rule);
+            }
         }
 
         return [
@@ -192,6 +199,7 @@ class VoteController
                 ];
             }, $players),
             'vote_info' => $voteInfo,
+            'vote_result' => $voteResult,
             'stats' => $stats,
         ];
     }
