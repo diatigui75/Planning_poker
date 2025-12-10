@@ -30,10 +30,6 @@ window.addEventListener('DOMContentLoaded', () => {
         lastStoryId = parseInt(storyCard.dataset.storyId);
     }
     
-    // Compter les stories au chargement
-    const storiesList = document.querySelectorAll('.story-item');
-    lastStoriesCount = storiesList.length;
-    
     updateSessionState();
     
     // Marquer comme chargé après 2 secondes
@@ -380,12 +376,9 @@ async function updateSessionState() {
                 
                 // UNE SEULE notification pour l'import (sauf celui qui a importé)
                 if (!isValidating) {
-                    showNotification('📥 Nouvelles user stories importées !', 'info');
+                    // showNotification('📥 Nouvelles user stories importées !', 'info');
                     playNotificationSound();
                 }
-                
-                // Recharger le backlog pour tout le monde
-                await reloadBacklogList();
                 
                 // Mettre à jour la barre de progression
                 updateProgressBar(data.stats);
@@ -434,9 +427,6 @@ async function updateSessionState() {
                 
                 // Réinitialiser les votes
                 resetVotingInterface();
-                
-                // Mettre à jour le backlog
-                await reloadBacklogList();
                 
                 // Mettre à jour la progression
                 updateProgressBar(data.stats);
@@ -943,67 +933,10 @@ function resetVotingInterface() {
 /**
  * Recharger la liste du backlog dynamiquement
  */
-async function reloadBacklogList() {
-    try {
-        const response = await fetch(API_URL + '?action=get_backlog_list');
-        const data = await response.json();
-        
-        if (data.success && data.stories) {
-            const backlogSection = document.querySelector('.backlog-section');
-            const storiesList = document.querySelector('.backlog-section .stories-list');
-            
-            // Si la section backlog n'existe pas encore, la créer
-            if (!backlogSection) {
-                createBacklogSection(data.stories);
-                return;
-            }
-            
-            if (!storiesList) return;
-            
-            // Vider la liste actuelle
-            storiesList.innerHTML = '';
-            
-            // Ajouter toutes les stories avec animation
-            data.stories.forEach((story, index) => {
-                const storyItem = document.createElement('div');
-                storyItem.className = `story-item status-${story.status}`;
-                storyItem.style.animation = `fadeIn 0.5s ease-out ${index * 0.05}s`;
-                storyItem.style.opacity = '0';
-                storyItem.style.animationFillMode = 'forwards';
-                
-                storyItem.innerHTML = `
-                    <div class="story-item-header">
-                        <span class="story-item-id">${escapeHtml(story.story_id)}</span>
-                        <span class="story-item-title">${escapeHtml(story.title)}</span>
-                    </div>
-                    <div class="story-item-footer">
-                        <span class="story-item-priority priority-${story.priority}">
-                            ${story.priority.charAt(0).toUpperCase() + story.priority.slice(1)}
-                        </span>
-                        ${story.estimation !== null 
-                            ? `<span class="story-item-estimation">✓ ${story.estimation} pts</span>`
-                            : `<span class="story-item-status">
-                                ${story.status === 'voting' ? '⏳ En cours' : 
-                                  (story.status === 'pending' ? '⏸️ En attente' : '✅ Estimée')}
-                               </span>`
-                        }
-                    </div>
-                `;
-                
-                storiesList.appendChild(storyItem);
-            });
-            
-            console.log('Backlog mis à jour:', data.stories.length, 'stories');
-        }
-    } catch (error) {
-        console.error('Erreur rechargement backlog:', error);
-    }
-}
-
+function displayBacklog(stories) {
 /**
  * Créer la section backlog si elle n'existe pas
  */
-function createBacklogSection(stories) {
     const container = document.querySelector('.vote-container');
     if (!container) return;
     
@@ -1052,22 +985,6 @@ function createBacklogSection(stories) {
     });
 }
 
-/**
- * Réactiver les cartes de vote (après un revote)
- */
-function enableVotingCards() {
-    document.querySelectorAll('.card-vote').forEach(btn => {
-        btn.disabled = false;
-        btn.classList.remove('disabled');
-    });
-    
-    const voteConfirmation = document.querySelector('.vote-confirmation');
-    if (voteConfirmation) {
-        voteConfirmation.style.display = 'none';
-    }
-    
-    showNotification('🔄 Nouveau tour de vote !', 'warning');
-}
 
 /**
  * Jouer un son de notification (optionnel)
@@ -1237,5 +1154,142 @@ window.addEventListener('click', (e) => {
     }
     if (e.target === revealModal) {
         closeRevealModal();
+    }
+});
+/**
+ * Afficher la modale Backlog
+ */
+function showBacklogModal() {
+    // Créer la modale si elle n'existe pas
+    let modal = document.getElementById('backlog-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'backlog-modal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3>📋 Backlog</h3>
+                    <button class="modal-close" onclick="closeBacklogModal()">&times;</button>
+                </div>
+                <div id="backlog-modal-content">
+                    <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                        Chargement...
+                    </p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    // Charger la liste des stories
+    fetch('api.php?action=get_backlog_list')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayBacklogInModal(data.stories);
+            } else {
+                document.getElementById('backlog-modal-content').innerHTML = `
+                    <p style="text-align: center; color: var(--danger-color); padding: 40px;">
+                        ❌ Erreur : ${data.error || 'Impossible de charger le backlog'}
+                    </p>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur chargement backlog:', error);
+            document.getElementById('backlog-modal-content').innerHTML = `
+                <p style="text-align: center; color: var(--danger-color); padding: 40px;">
+                    ❌ Erreur de chargement
+                </p>
+            `;
+        });
+    
+    modal.style.display = 'flex';
+}
+
+/**
+ * Afficher le backlog dans la modale
+ */
+function displayBacklogInModal(stories) {
+    const content = document.getElementById('backlog-modal-content');
+    
+    if (!stories || stories.length === 0) {
+        content.innerHTML = `
+            <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                📋 Aucune story dans le backlog
+            </p>
+        `;
+        return;
+    }
+    
+    let html = '<div class="backlog-modal-list">';
+    
+    stories.forEach(story => {
+        const statusIcon = story.status === 'estimated' ? '✅' : 
+                          story.status === 'voting' ? '⏳' : '⏸️';
+        const statusClass = story.status === 'estimated' ? 'estimated' : 
+                           story.status === 'voting' ? 'voting' : 'pending';
+        
+        html += `
+            <div class="backlog-modal-item status-${statusClass}">
+                <div class="backlog-item-header">
+                    <span class="backlog-item-id">${escapeHtml(story.story_id)}</span>
+                    <span class="backlog-item-title">${escapeHtml(story.title)}</span>
+                </div>
+                <div class="backlog-item-footer">
+                    <span class="backlog-item-priority priority-${story.priority}">
+                        ${story.priority.charAt(0).toUpperCase() + story.priority.slice(1)}
+                    </span>
+                    ${story.estimation !== null && story.estimation !== undefined
+                        ? `<span class="backlog-item-estimation">${statusIcon} ${story.estimation} pts</span>`
+                        : `<span class="backlog-item-status">${statusIcon} ${
+                            story.status === 'voting' ? 'En cours' : 
+                            story.status === 'pending' ? 'En attente' : 'Estimée'
+                        }</span>`
+                    }
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    content.innerHTML = html;
+}
+
+/**
+ * Fermer la modale Backlog
+ */
+function closeBacklogModal() {
+    const modal = document.getElementById('backlog-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Ouvrir/Fermer le menu mobile
+ */
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if (menu) {
+        menu.classList.toggle('active');
+        // Bloquer le scroll du body quand le menu est ouvert
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+    }
+}
+
+function closeMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if (menu) {
+        menu.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Fermer le menu avec la touche Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeMobileMenu();
     }
 });

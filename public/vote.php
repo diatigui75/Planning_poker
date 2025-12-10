@@ -54,28 +54,64 @@ if ($currentStory) {
     </div>
 </div>
 
-<div class="vote-container">
+<!-- En-tête de session -->
     <!-- En-tête de session -->
-    <div class="session-header">
-        <div class="session-info">
-            <h1>🃏 <?php echo htmlspecialchars($session->session_name); ?></h1>
-            <p class="session-code">Code: <strong><?php echo htmlspecialchars($session->session_code); ?></strong></p>
-            <p class="player-name">Connecté en tant que: <strong><?php echo htmlspecialchars($player->pseudo); ?></strong>
+    <div class="app-header">
+        <div class="header-left">
+            <div class="app-logo">
+                <img src="assets/img/logo.svg" alt="Planning Poker Logo" width="32" height="32">
+            </div>
+            <div class="header-info">
+                <span class="header-code">Code: <strong><?php echo htmlspecialchars($session->session_code); ?></strong></span>
                 <?php if ($player->is_scrum_master): ?>
-                    <span class="badge-sm">Scrum Master</span>
+                    <span class="header-badge">👑 Scrum Master</span>
                 <?php endif; ?>
-            </p>
+            </div>
         </div>
-        <div class="session-actions">
+        
+        <div class="header-actions">
+            <button onclick="showBacklogModal()" class="header-btn" title="Backlog">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M3 3h10v2H3V3zm0 4h10v2H3V7zm0 4h7v2H3v-2z"/>
+                </svg>
+                <span>Backlog</span>
+            </button>
+            
             <?php if ($player->is_scrum_master): ?>
-                <button onclick="showImportModal()" class="btn-sm btn-secondary">📥 Importer backlog</button>
-                <a href="export_json.php" class="btn-sm btn-secondary">📤 Exporter</a>
-                <a href="api.php?action=save_session" class="btn-sm btn-secondary">💾 Sauvegarder</a>
+            <button onclick="showImportModal()" class="header-btn" title="Importer">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 2v8m0 0l3-3m-3 3L5 7m-3 7h12a1 1 0 001-1v-3"/>
+                </svg>
+                <span>Importer</span>
+            </button>
+            
+            <a href="export_json.php" class="header-btn" title="Exporter">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 14V6m0 0L5 9m3-3l3 3M2 9v3a1 1 0 001 1h10a1 1 0 001-1V9"/>
+                </svg>
+                <span>Exporter</span>
+            </a>
+            
             <?php endif; ?>
-            <a href="results.php" class="btn-sm btn-secondary">📊 Résultats</a>
-            <a href="logout.php" class="btn-sm btn-danger">🚪 Quitter</a>
+            
+            <a href="results.php" class="header-btn" title="Résultats">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M2 13h12M3 10h2v3H3v-3zm4-3h2v6H7V7zm4-4h2v10h-2V3z"/>
+                </svg>
+                <span>Résultats</span>
+            </a>
+            
+            <a href="logout.php" class="header-btn header-btn-danger" title="Quitter">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M11 2h3v12h-3M7 11l3-3-3-3M10 8H2"/>
+                </svg>
+                <span>Quitter</span>
+            </a>
         </div>
     </div>
+</div>
+
+<div class="vote-container">
 
     <!-- Barre de progression -->
     <?php if ($stats['total'] > 0): ?>
@@ -186,38 +222,6 @@ if ($currentStory) {
             </div>
         </div>
     <?php endif; ?>
-
-    <!-- Liste de toutes les stories -->
-    <?php if (!empty($allStories)): ?>
-    <div class="backlog-section">
-        <h3>Backlog complet</h3>
-        <div class="stories-list">
-            <?php foreach ($allStories as $story): ?>
-                <div class="story-item status-<?php echo $story->status; ?>">
-                    <div class="story-item-header">
-                        <span class="story-item-id"><?php echo htmlspecialchars($story->story_id); ?></span>
-                        <span class="story-item-title"><?php echo htmlspecialchars($story->title); ?></span>
-                    </div>
-                    <div class="story-item-footer">
-                        <span class="story-item-priority priority-<?php echo $story->priority; ?>">
-                            <?php echo ucfirst($story->priority); ?>
-                        </span>
-                        <?php if ($story->estimation !== null): ?>
-                            <span class="story-item-estimation">✓ <?php echo $story->estimation; ?> pts</span>
-                        <?php else: ?>
-                            <span class="story-item-status">
-                                <?php 
-                                    echo $story->status === 'voting' ? '⏳ En cours' : 
-                                         ($story->status === 'pending' ? '⏸️ En attente' : '✅ Estimée');
-                                ?>
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
 </div>
 
 <!-- Modal Import -->
@@ -255,6 +259,32 @@ if ($currentStory) {
 const isScrumMaster = <?php echo $player->is_scrum_master ? 'true' : 'false'; ?>;
 const sessionId = <?php echo $session->id; ?>;
 const playerId = <?php echo $player->id; ?>;
+
+// Fonction pour ajuster le padding-top en fonction de la hauteur du header
+function adjustContentPadding() {
+    const header = document.querySelector('.app-header');
+    const voteContainer = document.querySelector('.vote-container');
+    
+    if (header && voteContainer) {
+        const headerHeight = header.offsetHeight;
+        // Ajouter 24px de marge
+        voteContainer.style.paddingTop = (headerHeight + 24) + 'px';
+    }
+}
+
+// Ajuster au chargement
+window.addEventListener('DOMContentLoaded', adjustContentPadding);
+
+// Ajuster lors du redimensionnement de la fenêtre
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(adjustContentPadding, 100);
+});
+
+// Ajuster après le chargement complet (pour les polices personnalisées, etc.)
+window.addEventListener('load', adjustContentPadding);
+
 </script>
 <script src="assets/js/vote.js?v=<?php echo time(); ?>"></script>
 

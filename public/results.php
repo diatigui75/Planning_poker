@@ -36,7 +36,8 @@ foreach ($stories as $story) {
         .results-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 80px 20px 30px 20px; /* padding-top initial, sera ajusté par JS */
+            transition: padding-top 0.2s ease;
         }
         
         .results-header {
@@ -55,7 +56,7 @@ foreach ($stories as $story) {
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #667eea 100%);
+            background: var(--gray-100);
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -132,36 +133,91 @@ foreach ($stories as $story) {
             justify-content: center;
             margin-top: 20px;
         }
+        
+        /* Responsive pour results */
+        @media (max-width: 768px) {
+            .results-header {
+                padding: 20px;
+            }
+            
+            .results-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.85rem;
+            }
+            
+            .results-table {
+                padding: 20px;
+                overflow-x: auto;
+            }
+            
+            table {
+                font-size: 0.875rem;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            .actions-row {
+                gap: 10px;
+            }
+            
+            .actions-row .btn {
+                font-size: 0.875rem;
+                padding: 10px 16px;
+            }
+        }
     </style>
 </head>
 <body class="vote-bg">
 
-<div class="results-container">
-    <div class="results-header">
-        <h1>📊 Résultats - <?php echo htmlspecialchars($session->session_name); ?></h1>
-        <p style="color: #666; margin-top: 10px;">
-            Code de session: <strong><?php echo htmlspecialchars($session->session_code); ?></strong>
-        </p>
-        
-        <div class="results-stats">
-            <div class="stat-card">
-                <div class="stat-label">Total Stories</div>
-                <div class="stat-value"><?php echo $stats['total']; ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Estimées</div>
-                <div class="stat-value"><?php echo $stats['estimated']; ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">En attente</div>
-                <div class="stat-value"><?php echo $stats['pending']; ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Points</div>
-                <div class="stat-value"><?php echo $totalPoints; ?></div>
-            </div>
+<!-- En-tête de l'application -->
+<div class="app-header">
+    <div class="header-left">
+        <div class="app-logo">
+            <img src="assets/img/logo.svg" alt="Planning Poker Logo" width="32" height="32">
+        </div>
+        <div class="header-info">
+            <span class="header-code">Code: <strong><?php echo htmlspecialchars($session->session_code); ?></strong></span>
+            <?php if (isset($_SESSION['is_scrum_master']) && $_SESSION['is_scrum_master']): ?>
+                <span class="header-badge">👑 Scrum Master</span>
+            <?php endif; ?>
         </div>
     </div>
+    
+    <div class="header-actions">
+        <a href="vote.php" class="header-btn" title="Retour au vote">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 2L2 8l6 6 6-6-6-6z"/>
+            </svg>
+            <span>Retour au vote</span>
+        </a>
+        
+        <a href="export_json.php" class="header-btn" title="Exporter">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 14V6m0 0L5 9m3-3l3 3M2 9v3a1 1 0 001 1h10a1 1 0 001-1V9"/>
+            </svg>
+            <span>Exporter</span>
+        </a>
+        
+        <a href="logout.php" class="header-btn header-btn-danger" title="Quitter">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M11 2h3v12h-3M7 11l3-3-3-3M10 8H2"/>
+            </svg>
+            <span>Quitter</span>
+        </a>
+    </div>
+</div>
+
+<div class="results-container">
 
     <div class="results-table">
         <h2 style="margin-bottom: 20px;">Détail des User Stories</h2>
@@ -217,11 +273,37 @@ foreach ($stories as $story) {
         
         <div class="actions-row">
             <a href="export_json.php" class="btn btn-primary">📥 Exporter en JSON</a>
-            <a href="api.php?action=save_session" class="btn btn-secondary">💾 Sauvegarder la session</a>
             <a href="vote.php" class="btn btn-secondary">← Retour au vote</a>
         </div>
     </div>
 </div>
+
+<script>
+// Fonction pour ajuster le padding-top en fonction de la hauteur du header
+function adjustContentPadding() {
+    const header = document.querySelector('.app-header');
+    const resultsContainer = document.querySelector('.results-container');
+    
+    if (header && resultsContainer) {
+        const headerHeight = header.offsetHeight;
+        // Ajouter 24px de marge
+        resultsContainer.style.paddingTop = (headerHeight + 24) + 'px';
+    }
+}
+
+// Ajuster au chargement
+window.addEventListener('DOMContentLoaded', adjustContentPadding);
+
+// Ajuster lors du redimensionnement de la fenêtre
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(adjustContentPadding, 100);
+});
+
+// Ajuster après le chargement complet
+window.addEventListener('load', adjustContentPadding);
+</script>
 
 </body>
 </html>
