@@ -6,17 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Poker - Accueil</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body class="home-bg">
 
 <!-- Icône Règles du jeu en haut à droite (améliorée) -->
 <button class="rules-icon-home" onclick="openRulesModal()" title="Règles du jeu">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-    </svg>
+    <i class="fas fa-question-circle"></i>
     <span>Règles</span>
 </button>
 
@@ -74,12 +71,12 @@
                     <span class="card-preview">13</span>
                     <span class="card-preview">21</span>
                     <span class="card-preview">?</span>
-                    <span class="card-preview">☕</span>
+                    <span class="card-preview"><i class="fas fa-coffee"></i></span>
                 </div>
                 <ul>
                     <li><strong>0-100</strong> : Points de complexité</li>
                     <li><strong>?</strong> : Je ne sais pas / Besoin de plus d'infos</li>
-                    <li><strong>☕</strong> : Pause nécessaire</li>
+                    <li><strong><i class="fas fa-coffee"></i></strong> : Pause nécessaire</li>
                 </ul>
             </section>
 
@@ -100,7 +97,7 @@
                     <li>Votez selon votre propre jugement, pas celui des autres</li>
                     <li>Discutez des écarts importants entre les votes</li>
                     <li>N'hésitez pas à demander des précisions</li>
-                    <li>Prenez des pauses si nécessaire (carte ☕)</li>
+                    <li>Prenez des pauses si nécessaire (carte <i class="fas fa-coffee"></i>)</li>
                 </ul>
             </section>
         </div>

@@ -74,7 +74,7 @@ async function voteCard(value) {
         }
         
         if (data.success) {
-            showNotification('✅ Vote enregistré !', 'success');
+            showNotification('<i class="fas fa-check-circle"></i> Vote enregistré !', 'success');
             // Désactiver tous les boutons de vote
             document.querySelectorAll('.card-vote').forEach(btn => {
                 btn.disabled = true;
@@ -82,11 +82,11 @@ async function voteCard(value) {
             });
             updateSessionState();
         } else {
-            showNotification('❌ ' + (data.error || 'Erreur inconnue'), 'error');
+            showNotification('<i class="fas fa-times-circle"></i> ' + (data.error || 'Erreur inconnue'), 'error');
         }
     } catch (error) {
         console.error('Erreur:', error);
-        showNotification('❌ Erreur lors du vote: ' + error.message, 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Erreur lors du vote: ' + error.message, 'error');
     }
 }
 
@@ -95,7 +95,7 @@ async function voteCard(value) {
  */
 async function revealVotes() {
     if (!isScrumMaster) {
-        showNotification('❌ Action réservée au Scrum Master', 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Action réservée au Scrum Master', 'error');
         return;
     }
 
@@ -112,17 +112,17 @@ async function revealVotes() {
         
         if (data.success) {
             if (data.coffee_break) {
-                showNotification('☕ Pause café ! Session sauvegardée.', 'info');
+                showNotification('<i class="fas fa-coffee"></i> Pause café ! Session sauvegardée.', 'info');
                 setTimeout(() => location.reload(), 2000);
             } else {
                 displayRevealModal(data);
             }
         } else {
-            showNotification('❌ ' + data.error, 'error');
+            showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
         }
     } catch (error) {
         console.error('Erreur:', error);
-        showNotification('❌ Erreur lors de la révélation', 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Erreur lors de la révélation', 'error');
     }
 }
 
@@ -156,7 +156,7 @@ function displayRevealModal(data) {
         if (data.result.valid) {
             html += `
                 <div class="result-box success">
-                    <h4>✅ ${data.result.reason}</h4>
+                    <h4><i class="fas fa-check-circle"></i> ${data.result.reason}</h4>
                     <p class="result-value">Estimation proposée: <strong>${data.result.value}</strong> points</p>
                 </div>
             `;
@@ -165,10 +165,10 @@ function displayRevealModal(data) {
                 html += `
                     <div class="modal-actions">
                         <button onclick="validateEstimation(${data.result.value})" class="btn btn-success">
-                            ✓ Valider cette estimation
+                            <i class="fas fa-check"></i> Valider cette estimation
                         </button>
                         <button onclick="revote()" class="btn btn-warning">
-                            🔄 Revoter
+                            <i class="fas fa-sync-alt"></i> Revoter
                         </button>
                     </div>
                 `;
@@ -176,7 +176,7 @@ function displayRevealModal(data) {
         } else {
             html += `
                 <div class="result-box warning">
-                    <h4>⚠️ ${data.result.reason}</h4>
+                    <h4><i class="fas fa-exclamation-triangle"></i> ${data.result.reason}</h4>
                     <p>Discussion nécessaire avant de continuer.</p>
                 </div>
             `;
@@ -185,7 +185,7 @@ function displayRevealModal(data) {
                 html += `
                     <div class="modal-actions">
                         <button onclick="revote()" class="btn btn-warning">
-                            🔄 Lancer un nouveau vote
+                            <i class="fas fa-sync-alt"></i> Lancer un nouveau vote
                         </button>
                         <button onclick="customEstimation()" class="btn btn-secondary">
                             ✏️ Forcer une estimation
@@ -213,7 +213,7 @@ function displayRevealModalReadOnly(data) {
     isModalOpen = true;
     
     let html = '<div class="votes-reveal">';
-    html += '<h4>🔍 Votes révélés</h4>';
+    html += '<h4><i class="fas fa-eye"></i> Votes révélés</h4>';
     html += '<div class="votes-grid">';
     
     data.votes.forEach(vote => {
@@ -232,14 +232,14 @@ function displayRevealModalReadOnly(data) {
         if (data.result.valid) {
             html += `
                 <div class="result-box success">
-                    <h4>✅ ${data.result.reason}</h4>
+                    <h4><i class="fas fa-check-circle"></i> ${data.result.reason}</h4>
                     <p class="result-value">Estimation proposée: <strong>${data.result.value}</strong> points</p>
                 </div>
             `;
         } else {
             html += `
                 <div class="result-box warning">
-                    <h4>⚠️ ${data.result.reason}</h4>
+                    <h4><i class="fas fa-exclamation-triangle"></i> ${data.result.reason}</h4>
                     <p>Discussion nécessaire avant de continuer.</p>
                 </div>
             `;
@@ -249,7 +249,7 @@ function displayRevealModalReadOnly(data) {
     // Message d'attente pour les joueurs
     html += `
         <div class="result-box info" style="margin-top: 16px;">
-            <h4>⏳ En attente de la décision du Scrum Master</h4>
+            <h4><i class="fas fa-clock"></i> En attente de la décision du Scrum Master</h4>
             <p>Le Scrum Master évalue les résultats et décidera de valider l'estimation ou de relancer un vote.</p>
         </div>
     `;
@@ -267,7 +267,7 @@ function displayRevealModalReadOnly(data) {
 async function validateEstimation(estimation) {
     const storyId = getCurrentStoryId();
     if (!storyId) {
-        showNotification('❌ Aucune story en cours', 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Aucune story en cours', 'error');
         return;
     }
 
@@ -288,7 +288,7 @@ async function validateEstimation(estimation) {
         const data = await response.json();
         
         if (data.success) {
-            showNotification('✅ Estimation validée !', 'success');
+            showNotification('<i class="fas fa-check-circle"></i> Estimation validée !', 'success');
             closeRevealModal();
             
             // Pour le Scrum Master, recharger la page après un court délai
@@ -297,12 +297,12 @@ async function validateEstimation(estimation) {
                 location.reload();
             }, 1000);
         } else {
-            showNotification('❌ ' + data.error, 'error');
+            showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
             isValidating = false;
         }
     } catch (error) {
         console.error('Erreur:', error);
-        showNotification('❌ Erreur lors de la validation', 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Erreur lors de la validation', 'error');
         isValidating = false;
     }
 }
@@ -337,15 +337,15 @@ async function revote() {
         const data = await response.json();
         
         if (data.success) {
-            showNotification('🔄 Nouveau tour de vote lancé', 'success');
+            showNotification('<i class="fas fa-sync-alt"></i> Nouveau tour de vote lancé', 'success');
             closeRevealModal();
             setTimeout(() => location.reload(), 1000);
         } else {
-            showNotification('❌ ' + data.error, 'error');
+            showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
         }
     } catch (error) {
         console.error('Erreur:', error);
-        showNotification('❌ Erreur', 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Erreur', 'error');
     }
 }
 
@@ -411,7 +411,7 @@ async function updateSessionState() {
                 console.log('🏁 Session terminée détectée');
                 
                 // Notification avant rechargement
-                showNotification('🎉 Toutes les stories sont estimées !', 'success');
+                showNotification('<i class="fas fa-trophy"></i> Toutes les stories sont estimées !', 'success');
                 
                 // Recharger après un court délai pour laisser voir la notification
                 setTimeout(() => {
@@ -423,7 +423,7 @@ async function updateSessionState() {
             
             // IMPORT DE NOUVELLES STORIES DÉTECTÉ
             if (storiesCountChanged && !isInitialLoad) {
-                console.log('📥 IMPORT DÉTECTÉ:', {
+                console.log('<i class="fas fa-file-import"></i> IMPORT DÉTECTÉ:', {
                     ancienTotal: lastStoriesCount,
                     nouveauTotal: data.stats.total,
                     isValidating: isValidating,
@@ -435,7 +435,7 @@ async function updateSessionState() {
                 
                 // UNE SEULE notification pour l'import (sauf celui qui a importé)
                 if (!isValidating) {
-                    // showNotification('📥 Nouvelles user stories importées !', 'info');
+                    // showNotification('<i class="fas fa-file-import"></i> Nouvelles user stories importées !', 'info');
                     playNotificationSound();
                 }
                 
@@ -452,14 +452,14 @@ async function updateSessionState() {
                     showStorySection(data.story);
                     
                     // Notification supplémentaire SEULEMENT pour la première story
-                    showNotification('📋 Première story prête à être estimée !', 'success');
+                    showNotification('<i class="fas fa-clipboard-list"></i> Première story prête à être estimée !', 'success');
                 }
             }
             
             // CHANGEMENT DE STORY DÉTECTÉ (après validation ou autre action)
             // Condition simplifiée : story a changé ET on n'est pas en chargement initial ET modal fermé
             if (storyChanged && !isInitialLoad && !isModalOpen) {
-                console.log('📋 CHANGEMENT DE STORY DÉTECTÉ:', {
+                console.log('<i class="fas fa-clipboard-list"></i> CHANGEMENT DE STORY DÉTECTÉ:', {
                     de: lastStoryId,
                     vers: currentStoryId,
                     statut: data.session.status,
@@ -472,11 +472,11 @@ async function updateSessionState() {
                 // UNE SEULE notification selon le rôle
                 if (typeof isScrumMaster !== 'undefined' && !isScrumMaster) {
                     // Pour les joueurs : notification d'une nouvelle story
-                    showNotification('📋 Nouvelle story à estimer !', 'info');
+                    showNotification('<i class="fas fa-clipboard-list"></i> Nouvelle story à estimer !', 'info');
                     playNotificationSound();
                 } else if (typeof isScrumMaster !== 'undefined' && isScrumMaster && !isValidating) {
                     // Pour le SM : seulement si ce n'est pas lui qui vient de valider
-                    showNotification('📋 Story suivante chargée', 'success');
+                    showNotification('<i class="fas fa-clipboard-list"></i> Story suivante chargée', 'success');
                 }
                 
                 // Mettre à jour la story affichée dynamiquement
@@ -500,7 +500,7 @@ async function updateSessionState() {
             
             // Détection spéciale : Story disparue (dernière story validée)
             if (lastStoryId && !currentStoryId && !isInitialLoad && data.session.status !== 'finished') {
-                console.log('⚠️ Story actuelle disparue, attente du statut finished...');
+                console.log('<i class="fas fa-exclamation-triangle"></i> Story actuelle disparue, attente du statut finished...');
                 // La story a disparu mais le statut n'est pas encore 'finished'
                 // Le prochain polling détectera le changement de statut
             }
@@ -543,7 +543,7 @@ async function updateSessionState() {
                 }
                 
                 resetVotingInterface();
-                showNotification('🔄 Nouveau tour de vote !', 'warning');
+                showNotification('<i class="fas fa-sync-alt"></i> Nouveau tour de vote !', 'warning');
             }
             
             // VALIDATION DÉTECTÉE (passage à waiting ou finished) → Fermer la modale
@@ -656,7 +656,7 @@ function updatePlayersList(players, voteInfo) {
             
             // Notification si nouveau joueur
             if (newCount > currentCount && !isInitialLoad) {
-                showNotification('👤 Un nouveau joueur a rejoint !', 'info');
+                showNotification('<i class="fas fa-user"></i> Un nouveau joueur a rejoint !', 'info');
                 playNotificationSound();
             }
         }
@@ -693,9 +693,9 @@ function rebuildPlayersGrid(players, voteInfo) {
         playerCard.dataset.playerId = player.id;
         
         playerCard.innerHTML = `
-            <span class="player-icon">${player.is_scrum_master ? '👑' : '👤'}</span>
+            <span class="player-icon">${player.is_scrum_master ? '<i class="fas fa-crown"></i>' : '<i class="fas fa-user"></i>'}</span>
             <span class="player-pseudo">${escapeHtml(player.pseudo)}</span>
-            <span class="vote-status ${hasVoted ? '' : 'pending'}">${hasVoted ? '✅' : '⏳'}</span>
+            <span class="vote-status ${hasVoted ? '' : 'pending'}">${hasVoted ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-clock"></i>'}</span>
         `;
         
         // Animation d'apparition pour les nouveaux joueurs
@@ -728,11 +728,11 @@ function updatePlayerVoteStatus(players, voteInfo) {
             const statusIcon = playerCard.querySelector('.vote-status');
             if (statusIcon) {
                 const hasVoted = votedPlayerIds.includes(player.id);
-                const wasVoted = statusIcon.textContent === '✅';
+                const wasVoted = statusIcon.innerHTML.includes('fa-check-circle');
                 
                 if (hasVoted && !wasVoted) {
                     // Nouveau vote détecté
-                    statusIcon.textContent = '✅';
+                    statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
                     statusIcon.classList.remove('pending');
                     playerCard.classList.add('voted');
                     
@@ -743,7 +743,7 @@ function updatePlayerVoteStatus(players, voteInfo) {
                     }, 500);
                 } else if (!hasVoted && wasVoted) {
                     // Vote retiré (cas du revote)
-                    statusIcon.textContent = '⏳';
+                    statusIcon.innerHTML = '<i class="fas fa-clock"></i>';
                     statusIcon.classList.add('pending');
                     playerCard.classList.remove('voted');
                 }
@@ -902,7 +902,7 @@ function showStorySection(story) {
                 ${typeof isScrumMaster !== 'undefined' && isScrumMaster ? `
                     <div class="sm-actions">
                         <button onclick="revealVotes()" class="btn btn-primary" data-vote-count disabled>
-                            🔍 Révéler les votes (<span id="vote-counter">0</span>)
+                            <i class="fas fa-eye"></i> Révéler les votes (<span id="vote-counter">0</span>)
                         </button>
                     </div>
                 ` : ''}
@@ -938,7 +938,7 @@ function generateCardsHTML() {
         {value: '40', display: '40'},
         {value: '100', display: '100'},
         {value: '?', display: '?'},
-        {value: 'cafe', display: '☕'}
+        {value: 'cafe', display: '<i class="fas fa-coffee"></i>'}
     ];
     
     return cards.map(card => `
@@ -1016,7 +1016,7 @@ function resetVotingInterface() {
     
     // Réinitialiser les statuts des joueurs
     document.querySelectorAll('.vote-status').forEach(status => {
-        status.textContent = '⏳';
+        status.innerHTML = '<i class="fas fa-clock"></i>';
         status.classList.add('pending');
     });
     
@@ -1067,10 +1067,10 @@ function displayBacklog(stories) {
                     ${story.priority.charAt(0).toUpperCase() + story.priority.slice(1)}
                 </span>
                 ${story.estimation !== null 
-                    ? `<span class="story-item-estimation">✓ ${story.estimation} pts</span>`
+                    ? `<span class="story-item-estimation"><i class="fas fa-check"></i> ${story.estimation} pts</span>`
                     : `<span class="story-item-status">
-                        ${story.status === 'voting' ? '⏳ En cours' : 
-                          (story.status === 'pending' ? '⏸️ En attente' : '✅ Estimée')}
+                        ${story.status === 'voting' ? '<i class="fas fa-clock"></i> En cours' : 
+                          (story.status === 'pending' ? '⏸️ En attente' : '<i class="fas fa-check-circle"></i> Estimée')}
                        </span>`
                 }
             </div>
@@ -1159,15 +1159,15 @@ document.getElementById('import-form')?.addEventListener('submit', async (e) => 
         const data = await response.json();
         
         if (data.success) {
-            showNotification(`✅ ${data.message}`, 'success');
+            showNotification(`<i class="fas fa-check-circle"></i> ${data.message}`, 'success');
             closeImportModal();
             setTimeout(() => location.reload(), 1500);
         } else {
-            showNotification('❌ ' + data.error, 'error');
+            showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
         }
     } catch (error) {
         console.error('Erreur:', error);
-        showNotification('❌ Erreur lors de l\'import', 'error');
+        showNotification('<i class="fas fa-times-circle"></i> Erreur lors de l\'import', 'error');
     }
 });
 
@@ -1219,7 +1219,7 @@ function displayNextNotification() {
     
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
-    notification.textContent = message;
+    notification.innerHTML = message; // Utiliser innerHTML pour supporter les icônes HTML
     
     document.body.appendChild(notification);
     
@@ -1264,7 +1264,7 @@ function showBacklogModal() {
         modal.innerHTML = `
             <div class="modal-content modal-large">
                 <div class="modal-header">
-                    <h3>📋 Backlog</h3>
+                    <h3><i class="fas fa-clipboard-list"></i> Backlog</h3>
                     <button class="modal-close" onclick="closeBacklogModal()">&times;</button>
                 </div>
                 <div id="backlog-modal-content">
@@ -1286,7 +1286,7 @@ function showBacklogModal() {
             } else {
                 document.getElementById('backlog-modal-content').innerHTML = `
                     <p style="text-align: center; color: var(--danger-color); padding: 40px;">
-                        ❌ Erreur : ${data.error || 'Impossible de charger le backlog'}
+                        <i class="fas fa-times-circle"></i> Erreur : ${data.error || 'Impossible de charger le backlog'}
                     </p>
                 `;
             }
@@ -1295,7 +1295,7 @@ function showBacklogModal() {
             console.error('Erreur chargement backlog:', error);
             document.getElementById('backlog-modal-content').innerHTML = `
                 <p style="text-align: center; color: var(--danger-color); padding: 40px;">
-                    ❌ Erreur de chargement
+                    <i class="fas fa-times-circle"></i> Erreur de chargement
                 </p>
             `;
         });
@@ -1312,7 +1312,7 @@ function displayBacklogInModal(stories) {
     if (!stories || stories.length === 0) {
         content.innerHTML = `
             <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                📋 Aucune story dans le backlog
+                <i class="fas fa-clipboard-list"></i> Aucune story dans le backlog
             </p>
         `;
         return;
@@ -1321,8 +1321,8 @@ function displayBacklogInModal(stories) {
     let html = '<div class="backlog-modal-list">';
     
     stories.forEach(story => {
-        const statusIcon = story.status === 'estimated' ? '✅' : 
-                          story.status === 'voting' ? '⏳' : '⏸️';
+        const statusIcon = story.status === 'estimated' ? '<i class="fas fa-check-circle"></i>' : 
+                          story.status === 'voting' ? '<i class="fas fa-clock"></i>' : '⏸️';
         const statusClass = story.status === 'estimated' ? 'estimated' : 
                            story.status === 'voting' ? 'voting' : 'pending';
         

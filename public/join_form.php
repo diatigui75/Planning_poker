@@ -15,6 +15,7 @@ $errorMessages = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rejoindre une session - Planning Poker</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body class="form-bg">
@@ -24,7 +25,7 @@ $errorMessages = [
 
     <?php if ($error && isset($errorMessages[$error])): ?>
         <div class="error-message">
-            ⚠️ <?php echo htmlspecialchars($errorMessages[$error]); ?>
+            <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($errorMessages[$error]); ?>
         </div>
     <?php endif; ?>
 

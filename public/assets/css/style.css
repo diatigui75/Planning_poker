@@ -751,27 +751,27 @@ form a.btn-back {
 }
 
 .story-badge {
-    padding: 4px 12px;
+    padding: 6px 16px;
     border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.5px;
 }
 
 .priority-haute {
-    background: var(--danger-color);     /* Rouge pour haute priorité */
-    color: white;
+    background: #ffe0e0;                 /* Rose clair comme dans results */
+    color: #c41e3a;                      /* Rouge foncé */
 }
 
 .priority-moyenne {
-    background: var(--gray-70);          /* Gris moyen */
-    color: white;
+    background: #e8e8e8;                 /* Gris clair */
+    color: #525252;                      /* Gris foncé */
 }
 
 .priority-basse {
-    background: var(--gray-30);          /* Gris clair */
-    color: var(--text-primary);
+    background: #e8e8e8;                 /* Gris clair */
+    color: #525252;                      /* Gris foncé */
 }
 
 .story-description {
@@ -808,28 +808,22 @@ form a.btn-back {
 }
 
 .card-vote {
-    background: var(--bg-white);
-    border: 2px solid var(--border-subtle);
+    background: transparent;
+    border: none;
     border-radius: var(--border-radius);
-    padding: 20px 10px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    padding: 4px;
     cursor: pointer;
     transition: var(--transition);
     text-align: center;
 }
 
 .card-vote:hover:not(:disabled) {
-    border-color: var(--primary-color);
-    background: var(--primary-color);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-lg);
 }
 
 .card-vote:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(-2px) scale(1.02);
 }
 
 .card-vote:disabled,
@@ -840,6 +834,21 @@ form a.btn-back {
 
 .card-value {
     display: block;
+}
+
+/* Images SVG des cartes */
+.card-image {
+    width: 100%;
+    height: auto;
+    max-width: 120px;
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: filter 0.2s ease;
+}
+
+.card-vote:hover:not(:disabled) .card-image {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
 }
 
 .vote-confirmation {
@@ -1177,6 +1186,12 @@ form a.btn-back {
     background: var(--primary-color);
 }
 
+/* Icônes dans les notifications */
+.notification i {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
 /* Indicateur de chargement */
 .loading-indicator {
     position: fixed;
@@ -1492,26 +1507,27 @@ a:focus-visible {
 }
 
 .backlog-item-priority {
-    padding: 2px 8px;
+    padding: 6px 16px;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0.5px;
 }
 
 .backlog-item-priority.priority-haute {
-    background: var(--danger-color);     /* Rouge pour haute */
-    color: white;
+    background: #ffe0e0;                 /* Rose clair comme dans results */
+    color: #c41e3a;                      /* Rouge foncé */
 }
 
 .backlog-item-priority.priority-moyenne {
-    background: var(--gray-70);          /* Gris moyen */
-    color: white;
+    background: #e8e8e8;                 /* Gris clair */
+    color: #525252;                      /* Gris foncé */
 }
 
 .backlog-item-priority.priority-basse {
-    background: var(--gray-30);          /* Gris clair */
-    color: var(--text-primary);
+    background: #e8e8e8;                 /* Gris clair */
+    color: #525252;                      /* Gris foncé */
 }
 
 .backlog-item-estimation {

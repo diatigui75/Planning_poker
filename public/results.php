@@ -32,6 +32,7 @@ foreach ($stories as $story) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Résultats - Planning Poker</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .results-container {
             max-width: 1200px;
@@ -84,46 +85,98 @@ foreach ($stories as $story) {
         
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
         }
         
         thead {
-            background: #f8f9fa;
+            background: transparent;
         }
         
         th {
-            padding: 15px;
+            padding: 16px 20px;
             text-align: left;
             font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #dee2e6;
+            color: #161616;
+            font-size: 0.875rem;
+            border-bottom: 2px solid #e0e0e0;
         }
         
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            padding: 20px;
+            border-bottom: 1px solid #f4f4f4;
+            vertical-align: middle;
+            font-size: 0.9375rem;
         }
         
-        tr:hover {
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        tbody tr:hover {
             background: #f8f9fa;
         }
         
-        .estimation-badge {
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Badge Priorité */
+        .priority-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .priority-badge.haute {
+            background: #ffe0e0;
+            color: #c41e3a;
+        }
+        
+        .priority-badge.moyenne {
+            background: #e8e8e8;
+            color: #525252;
+        }
+        
+        .priority-badge.basse {
+            background: #e8e8e8;
+            color: #525252;
+        }
+        
+        /* Badge Estimation */
+        .estimation-value {
+            display: inline-block;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            color: #24a148;
         }
         
-        .estimated {
-            background: #d4edda;
-            color: #155724;
+        /* Badge Statut */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.8125rem;
         }
         
-        .pending {
+        .status-badge.estimated {
+            background: #d4f4dd;
+            color: #0f5132;
+        }
+        
+        .status-badge.voting {
             background: #fff3cd;
-            color: #856404;
+            color: #997404;
+        }
+        
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #997404;
         }
         
         .actions-row {
@@ -188,7 +241,7 @@ foreach ($stories as $story) {
         <div class="header-info">
             <span class="header-code">Code: <strong><?php echo htmlspecialchars($session->session_code); ?></strong></span>
             <?php if (isset($_SESSION['is_scrum_master']) && $_SESSION['is_scrum_master']): ?>
-                <span class="header-badge">👑 Scrum Master</span>
+                <span class="header-badge"><i class="fas fa-crown"></i> Scrum Master</span>
             <?php endif; ?>
         </div>
     </div>
@@ -243,26 +296,26 @@ foreach ($stories as $story) {
                             <td><strong><?php echo htmlspecialchars($story->story_id); ?></strong></td>
                             <td><?php echo htmlspecialchars($story->title); ?></td>
                             <td>
-                                <span class="story-badge priority-<?php echo $story->priority; ?>">
-                                    <?php echo ucfirst($story->priority); ?>
+                                <span class="priority-badge <?php echo strtolower($story->priority); ?>">
+                                    <?php echo strtoupper($story->priority); ?>
                                 </span>
                             </td>
                             <td>
                                 <?php if ($story->estimation !== null): ?>
-                                    <strong style="color: #28a745; font-size: 1.1rem;">
+                                    <span class="estimation-value">
                                         <?php echo $story->estimation; ?> pts
-                                    </strong>
+                                    </span>
                                 <?php else: ?>
-                                    <span style="color: #999;">-</span>
+                                    <span style="color: #8d8d8d;">-</span>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($story->status === 'estimated'): ?>
-                                    <span class="estimation-badge estimated">✓ Estimée</span>
+                                    <span class="status-badge estimated"><i class="fas fa-check"></i> Estimée</span>
                                 <?php elseif ($story->status === 'voting'): ?>
-                                    <span class="estimation-badge pending">⏳ En cours</span>
+                                    <span class="status-badge voting"><i class="fas fa-clock"></i> En cours</span>
                                 <?php else: ?>
-                                    <span class="estimation-badge pending">⏸️ En attente</span>
+                                    <span class="status-badge pending">En attente</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -272,7 +325,7 @@ foreach ($stories as $story) {
         <?php endif; ?>
         
         <div class="actions-row">
-            <a href="export_json.php" class="btn btn-primary">📥 Exporter en JSON</a>
+            <a href="export_json.php" class="btn btn-primary"><i class="fas fa-download"></i> Exporter en JSON</a>
             <a href="vote.php" class="btn btn-secondary">← Retour au vote</a>
         </div>
     </div>

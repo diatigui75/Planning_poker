@@ -39,6 +39,7 @@ if ($currentStory) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vote - Planning Poker</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body class="vote-bg">
@@ -49,7 +50,7 @@ if ($currentStory) {
 <!-- Overlay de transition -->
 <div class="transition-overlay" id="transition-overlay">
     <div class="transition-content">
-        <h2>📋 Nouvelle Story</h2>
+        <h2><i class="fas fa-clipboard-list"></i> Nouvelle Story</h2>
         <p>Chargement en cours...</p>
     </div>
 </div>
@@ -64,47 +65,37 @@ if ($currentStory) {
             <div class="header-info">
                 <span class="header-code">Code: <strong><?php echo htmlspecialchars($session->session_code); ?></strong></span>
                 <?php if ($player->is_scrum_master): ?>
-                    <span class="header-badge">👑 Scrum Master</span>
+                    <span class="header-badge"><i class="fas fa-crown"></i> Scrum Master</span>
                 <?php endif; ?>
             </div>
         </div>
         
         <div class="header-actions">
             <button onclick="showBacklogModal()" class="header-btn" title="Backlog">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M3 3h10v2H3V3zm0 4h10v2H3V7zm0 4h7v2H3v-2z"/>
-                </svg>
+                <i class="fas fa-list"></i>
                 <span>Backlog</span>
             </button>
             
             <?php if ($player->is_scrum_master): ?>
             <button onclick="showImportModal()" class="header-btn" title="Importer">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 2v8m0 0l3-3m-3 3L5 7m-3 7h12a1 1 0 001-1v-3"/>
-                </svg>
+                <i class="fas fa-file-import"></i>
                 <span>Importer</span>
             </button>
             
             <a href="export_json.php" class="header-btn" title="Exporter">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 14V6m0 0L5 9m3-3l3 3M2 9v3a1 1 0 001 1h10a1 1 0 001-1V9"/>
-                </svg>
+                <i class="fas fa-file-export"></i>
                 <span>Exporter</span>
             </a>
             
             <?php endif; ?>
             
             <a href="results.php" class="header-btn" title="Résultats">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M2 13h12M3 10h2v3H3v-3zm4-3h2v6H7V7zm4-4h2v10h-2V3z"/>
-                </svg>
+                <i class="fas fa-chart-bar"></i>
                 <span>Résultats</span>
             </a>
             
             <a href="logout.php" class="header-btn header-btn-danger" title="Quitter">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M11 2h3v12h-3M7 11l3-3-3-3M10 8H2"/>
-                </svg>
+                <i class="fas fa-sign-out-alt"></i>
                 <span>Quitter</span>
             </a>
         </div>
@@ -131,12 +122,12 @@ if ($currentStory) {
         <div class="players-grid" id="players-grid">
             <?php foreach ($players as $p): ?>
                 <div class="player-card <?php echo $p->is_connected ? 'connected' : 'disconnected'; ?>" data-player-id="<?php echo $p->id; ?>">
-                    <span class="player-icon"><?php echo $p->is_scrum_master ? '👑' : '👤'; ?></span>
+                    <span class="player-icon"><?php echo $p->is_scrum_master ? '<i class="fas fa-crown"></i>' : '<i class="fas fa-user"></i>'; ?></span>
                     <span class="player-pseudo"><?php echo htmlspecialchars($p->pseudo); ?></span>
                     <?php if ($currentStory && Vote::hasPlayerVoted($pdo, $session->id, $currentStory->id, $p->id, 1)): ?>
-                        <span class="vote-status">✅</span>
+                        <span class="vote-status"><i class="fas fa-check-circle"></i></span>
                     <?php else: ?>
-                        <span class="vote-status pending">⏳</span>
+                        <span class="vote-status pending"><i class="fas fa-clock"></i></span>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
@@ -177,7 +168,7 @@ if ($currentStory) {
                         ['value' => '40', 'display' => '40'],
                         ['value' => '100', 'display' => '100'],
                         ['value' => '?', 'display' => '?'],
-                        ['value' => 'cafe', 'display' => '☕'],
+                        ['value' => 'cafe', 'display' => '<i class="fas fa-coffee"></i>'],
                     ];
                     foreach ($cards as $card): 
                     ?>
@@ -192,7 +183,7 @@ if ($currentStory) {
                 
                 <?php if ($hasVoted): ?>
                     <div class="vote-confirmation">
-                        ✅ Vous avez voté ! En attente des autres joueurs...
+                        <i class="fas fa-check-circle"></i> Vous avez voté ! En attente des autres joueurs...
                     </div>
                 <?php endif; ?>
 
@@ -200,7 +191,7 @@ if ($currentStory) {
                     <div class="sm-actions">
                         <button onclick="revealVotes()" class="btn btn-primary" data-vote-count
                                 <?php echo $voteCount === 0 ? 'disabled' : ''; ?>>
-                            🔍 Révéler les votes (<span id="vote-counter"><?php echo $voteCount; ?></span>)
+                            <i class="fas fa-eye"></i> Révéler les votes (<span id="vote-counter"><?php echo $voteCount; ?></span>)
                         </button>
                     </div>
                 <?php endif; ?>
@@ -211,11 +202,11 @@ if ($currentStory) {
         <!-- Aucune story -->
         <div class="no-story-section">
             <div class="no-story-card">
-                <p class="no-story-icon">📋</p>
+                <p class="no-story-icon"><i class="fas fa-clipboard-list"></i></p>
                 <h3>Aucune user story à estimer</h3>
                 <?php if ($player->is_scrum_master): ?>
                     <p>Importez un backlog pour commencer !</p>
-                    <button onclick="showImportModal()" class="btn btn-primary">📥 Importer un backlog</button>
+                    <button onclick="showImportModal()" class="btn btn-primary"><i class="fas fa-file-import"></i> Importer un backlog</button>
                 <?php else: ?>
                     <p>En attente que le Scrum Master importe un backlog...</p>
                 <?php endif; ?>
