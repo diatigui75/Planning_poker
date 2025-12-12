@@ -40,27 +40,41 @@
             <h3>Règles du Planning Poker</h3>
             <button class="modal-close" onclick="closeRulesModal()">&times;</button>
         </div>
-        
+
         <div class="rules-content">
+
             <section class="rule-section">
-                <h4>Objectif</h4>
-                <p>Le Planning Poker est une technique d'estimation agile qui permet à l'équipe d'évaluer la complexité des User Stories de manière collaborative.</p>
+                <h4>Mise en place</h4>
+                <ul>
+                    <li>Choisissez un animateur (Scrum Master) : gérer le temps et animer les discussions.</li>
+                    <li>Le Scrum Master crée la session et partage le code avec l’équipe pour qu’ils puissent rejoindre.</li>
+                    <li>Les autres membres jouent le rôle de l’équipe de développement.</li>
+                    <li>Le chat intégré permet de discuter en temps réel pendant le vote.</li>
+                </ul>
             </section>
 
             <section class="rule-section">
                 <h4>Déroulement</h4>
                 <ol>
-                    <li><strong>Présentation</strong> : Le Scrum Master importe le backlog</li>
-                    <li><strong>Déroulement</strong> : Une user story s'affiche à la fois</li>
-                    <li><strong>Discussion</strong> : L'équipe discute et pose des questions</li>
-                    <li><strong>Vote</strong> : Chaque membre vote en secret avec une carte</li>
-                    <li><strong>Révélation</strong> : Tous les votes sont révélés simultanément</li>
-                    <li><strong>Consensus</strong> : L'équipe discute des écarts et revote si nécessaire</li>
+                    <li>Une User Story s'affiche.</li>
+                    <li>Chaque membre choisit une carte représentant son estimation de complexité.</li>
+                    <li>Petit chiffre : tâche simple, rapide, bien comprise.</li>
+                    <li>Grand chiffre : tâche complexe, longue ou incertaine.</li>
+                    <li>Carte <i class="fas fa-coffee"></i> : besoin d'une pause.</li>
+                    <li>Carte <strong>?</strong> : je ne me sens pas compétent pour estimer.</li>
+                    <li>Le Scrum Master révèle les cartes une fois que tout le monde a voté.</li>
+                    <li>Si des écarts importants apparaissent :
+                        <ul>
+                            <li>Les personnes ayant donné les valeurs extrêmes expliquent leur point de vue.</li>
+                            <li>L’équipe discute brièvement.</li>
+                            <li>Un nouveau vote est fait jusqu’à consensus.</li>
+                        </ul>
+                    </li>
                 </ol>
             </section>
 
             <section class="rule-section">
-                <h4>Les Cartes</h4>
+                <h4>Les Cartes disponibles</h4>
                 <div class="cards-preview">
                     <span class="card-preview">0</span>
                     <span class="card-preview">1</span>
@@ -69,40 +83,33 @@
                     <span class="card-preview">5</span>
                     <span class="card-preview">8</span>
                     <span class="card-preview">13</span>
-                    <span class="card-preview">21</span>
+                    <span class="card-preview">20</span>
+                    <span class="card-preview">40</span>
+                    <span class="card-preview">100</span>
                     <span class="card-preview">?</span>
                     <span class="card-preview"><i class="fas fa-coffee"></i></span>
                 </div>
                 <ul>
-                    <li><strong>0-100</strong> : Points de complexité</li>
+                    <li><strong>0 - 100</strong> : Points de complexité</li>
                     <li><strong>?</strong> : Je ne sais pas / Besoin de plus d'infos</li>
                     <li><strong><i class="fas fa-coffee"></i></strong> : Pause nécessaire</li>
                 </ul>
             </section>
 
             <section class="rule-section">
-                <h4>Règles de Vote</h4>
+                <h4>Conseils pratiques</h4>
                 <ul>
-                    <li><strong>Unanimité</strong> : Tous les votes doivent être identiques</li>
-                    <li><strong>Moyenne</strong> : La moyenne des votes est retenue</li>
-                    <li><strong>Médiane</strong> : La valeur médiane est retenue</li>
-                    <li><strong>Majorité absolue</strong> : Plus de 50% des votes identiques</li>
-                    <li><strong>Majorité relative</strong> : Le vote le plus fréquent gagne</li>
+                    <li>Votez selon votre propre jugement, pas celui des autres.</li>
+                    <li>Discutez des écarts importants entre les votes.</li>
+                    <li>Utilisez le chat pour clarifier les points si nécessaire.</li>
+                    <li>Prenez des pauses si nécessaire (carte <i class="fas fa-coffee"></i>).</li>
                 </ul>
             </section>
 
-            <section class="rule-section">
-                <h4>Conseils</h4>
-                <ul>
-                    <li>Votez selon votre propre jugement, pas celui des autres</li>
-                    <li>Discutez des écarts importants entre les votes</li>
-                    <li>N'hésitez pas à demander des précisions</li>
-                    <li>Prenez des pauses si nécessaire (carte <i class="fas fa-coffee"></i>)</li>
-                </ul>
-            </section>
         </div>
     </div>
 </div>
+
 
 <script>
 function openRulesModal() {
