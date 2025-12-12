@@ -108,3 +108,9 @@ ALTER TABLE `votes`
   ADD CONSTRAINT `votes_ibfk_3` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE;
 
 COMMIT;
+-- Modification de la table sessions pour ajouter le statut coffee_break
+
+-- Ajout du statut 'coffee_break' aux valeurs possibles du champ status
+ALTER TABLE sessions 
+MODIFY COLUMN status ENUM('waiting', 'voting', 'revealed', 'finished', 'coffee_break') 
+DEFAULT 'waiting';

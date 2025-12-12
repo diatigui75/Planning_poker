@@ -87,13 +87,14 @@ try {
             }
             $data = VoteController::reveal($pdo, $_SESSION['session_id']);
             
+            // Vérifier si c'est une pause café
             if (isset($data['result']['coffee_break']) && $data['result']['coffee_break']) {
-                $json = \App\Services\JsonManager::saveSession($pdo, $_SESSION['session_id']);
                 jsonResponse([
                     'success' => true,
                     'coffee_break' => true,
-                    'message' => 'Pause café ! Session sauvegardée.',
-                    'save_data' => $json,
+                    'story' => $data['story'] ? ['id' => $data['story']->id, 'title' => $data['story']->title] : null,
+                    'votes' => $data['votes'],
+                    'result' => $data['result'],
                 ]);
             }
             
@@ -120,6 +121,33 @@ try {
             $storyId = (int)($_POST['story_id'] ?? 0);
             $estimation = (int)($_POST['estimation'] ?? 0);
             $result = VoteController::validateEstimation($pdo, $_SESSION['session_id'], $storyId, $estimation);
+            jsonResponse($result);
+            break;
+
+        case 'validate_coffee_break':
+            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
+                jsonResponse(['success' => false, 'error' => 'Action réservée au Scrum Master']);
+            }
+            $storyId = (int)($_POST['story_id'] ?? 0);
+            
+            // Sauvegarder automatiquement la session
+            $json = \App\Services\JsonManager::saveSession($pdo, $_SESSION['session_id']);
+            
+            $result = VoteController::validateCoffeeBreak($pdo, $_SESSION['session_id'], $storyId);
+            
+            if ($result['success']) {
+                $result['save_data'] = $json;
+            }
+            
+            jsonResponse($result);
+            break;
+
+        case 'resume_coffee_break':
+            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
+                jsonResponse(['success' => false, 'error' => 'Action réservée au Scrum Master']);
+            }
+            
+            $result = VoteController::resumeFromCoffeeBreak($pdo, $_SESSION['session_id']);
             jsonResponse($result);
             break;
 
@@ -189,112 +217,4 @@ try {
     }
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'error' => $e->getMessage()]);
-}
-
-try {
-    switch ($action) {
-        case 'get_session_state':
-            $result = VoteController::getSessionState($pdo, $_SESSION['session_id'], $_SESSION['player_id']);
-            echo json_encode($result);
-            break;
-
-        case 'cast_vote':
-            $voteValue = $_POST['vote_value'] ?? '';
-            if (empty($voteValue)) {
-                echo json_encode(['success' => false, 'error' => 'Vote invalide']);
-                exit;
-            }
-            $result = VoteController::submitVote($pdo, $_SESSION['session_id'], $_SESSION['player_id'], $voteValue);
-            echo json_encode($result);
-            break;
-
-        case 'start_voting':
-            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
-                echo json_encode(['success' => false, 'error' => 'Action réservée au Scrum Master']);
-                exit;
-            }
-            $storyId = (int)($_POST['story_id'] ?? 0);
-            $result = VoteController::startVoting($pdo, $_SESSION['session_id'], $storyId);
-            echo json_encode($result);
-            break;
-
-        case 'reveal_votes':
-            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
-                echo json_encode(['success' => false, 'error' => 'Action réservée au Scrum Master']);
-                exit;
-            }
-            $data = VoteController::reveal($pdo, $_SESSION['session_id']);
-            
-            if (isset($data['result']['coffee_break']) && $data['result']['coffee_break']) {
-                // Sauvegarder automatiquement la session
-                $json = \App\Services\JsonManager::saveSession($pdo, $_SESSION['session_id']);
-                echo json_encode([
-                    'success' => true,
-                    'coffee_break' => true,
-                    'message' => 'Pause café ! Session sauvegardée automatiquement.',
-                    'save_data' => $json,
-                ]);
-            } else {
-                echo json_encode([
-                    'success' => true,
-                    'story' => $data['story'] ? [
-                        'id' => $data['story']->id,
-                        'title' => $data['story']->title,
-                    ] : null,
-                    'votes' => $data['votes'],
-                    'result' => $data['result'],
-                ]);
-            }
-            break;
-
-        case 'revote':
-            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
-                echo json_encode(['success' => false, 'error' => 'Action réservée au Scrum Master']);
-                exit;
-            }
-            $result = VoteController::revote($pdo, $_SESSION['session_id']);
-            echo json_encode($result);
-            break;
-
-        case 'validate_estimation':
-            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
-                echo json_encode(['success' => false, 'error' => 'Action réservée au Scrum Master']);
-                exit;
-            }
-            $storyId = (int)($_POST['story_id'] ?? 0);
-            $estimation = (int)($_POST['estimation'] ?? 0);
-            $result = VoteController::validateEstimation($pdo, $_SESSION['session_id'], $storyId, $estimation);
-            echo json_encode($result);
-            break;
-
-        case 'import_backlog':
-            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
-                echo json_encode(['success' => false, 'error' => 'Action réservée au Scrum Master']);
-                exit;
-            }
-            if (!isset($_FILES['backlog'])) {
-                echo json_encode(['success' => false, 'error' => 'Fichier manquant']);
-                exit;
-            }
-            $count = BacklogController::importJson($pdo, $_SESSION['session_id'], $_FILES['backlog']);
-            echo json_encode(['success' => true, 'imported' => $count, 'message' => "$count user stories importées"]);
-            break;
-
-        case 'export_results':
-            BacklogController::exportJson($pdo, $_SESSION['session_id']);
-            break;
-
-        case 'save_session':
-            if (!isset($_SESSION['is_scrum_master']) || !$_SESSION['is_scrum_master']) {
-                echo json_encode(['success' => false, 'error' => 'Action réservée au Scrum Master']);
-                exit;
-            }
-            BacklogController::saveSession($pdo, $_SESSION['session_id']);
-            break;
-
-        default:
-            echo json_encode(['success' => false, 'error' => 'Action inconnue']);
-    }
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

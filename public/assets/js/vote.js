@@ -111,12 +111,7 @@ async function revealVotes() {
         const data = await response.json();
         
         if (data.success) {
-            if (data.coffee_break) {
-                showNotification('<i class="fas fa-coffee"></i> Pause café ! Session sauvegardée.', 'info');
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                displayRevealModal(data);
-            }
+            displayRevealModal(data);
         } else {
             showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
         }
@@ -141,9 +136,12 @@ function displayRevealModal(data) {
     html += '<div class="votes-grid">';
     
     data.votes.forEach(vote => {
+        const displayValue = vote.vote_value === 'cafe' 
+            ? '<i class="fas fa-coffee"></i>' 
+            : vote.vote_value;
         html += `
             <div class="vote-card">
-                <div class="vote-value">${vote.vote_value}</div>
+                <div class="vote-value">${displayValue}</div>
                 <div class="vote-player">${vote.pseudo}</div>
             </div>
         `;
@@ -151,8 +149,29 @@ function displayRevealModal(data) {
     
     html += '</div>';
     
-    // Résultat
-    if (data.result) {
+    // Vérifier si c'est une pause café
+    if (data.coffee_break && data.result && data.result.coffee_break) {
+        html += `
+            <div class="result-box info">
+                <h4><i class="fas fa-coffee"></i> ${data.result.reason}</h4>
+                <p>Tous les joueurs ont voté pour une pause café !</p>
+            </div>
+        `;
+        
+        if (isScrumMaster) {
+            html += `
+                <div class="modal-actions">
+                    <button onclick="validateCoffeeBreak()" class="btn btn-info">
+                        <i class="fas fa-coffee"></i> Valider la pause café
+                    </button>
+                    <button onclick="revote()" class="btn btn-warning">
+                        <i class="fas fa-sync-alt"></i> Revoter
+                    </button>
+                </div>
+            `;
+        }
+    } else if (data.result) {
+        // Résultat normal (non pause café)
         if (data.result.valid) {
             html += `
                 <div class="result-box success">
@@ -229,7 +248,14 @@ function displayRevealModalReadOnly(data) {
     
     // Afficher le résultat du vote si disponible
     if (data.result) {
-        if (data.result.valid) {
+        if (data.result.coffee_break) {
+            html += `
+                <div class="result-box info">
+                    <h4><i class="fas fa-coffee"></i> ${data.result.reason}</h4>
+                    <p>Tous les joueurs ont voté pour une pause café !</p>
+                </div>
+            `;
+        } else if (data.result.valid) {
             html += `
                 <div class="result-box success">
                     <h4><i class="fas fa-check-circle"></i> ${data.result.reason}</h4>
@@ -303,6 +329,104 @@ async function validateEstimation(estimation) {
     } catch (error) {
         console.error('Erreur:', error);
         showNotification('<i class="fas fa-times-circle"></i> Erreur lors de la validation', 'error');
+        isValidating = false;
+    }
+}
+
+/**
+ * Valider une pause café (Scrum Master)
+ */
+async function validateCoffeeBreak() {
+    if (!isScrumMaster) {
+        showNotification('<i class="fas fa-times-circle"></i> Action réservée au Scrum Master', 'error');
+        return;
+    }
+
+    const storyCard = document.querySelector('.story-card[data-story-id]');
+    if (!storyCard) {
+        showNotification('<i class="fas fa-times-circle"></i> Aucune story en cours', 'error');
+        return;
+    }
+
+    const storyId = parseInt(storyCard.dataset.storyId);
+
+    try {
+        // Activer le flag de validation AVANT l'appel API
+        isValidating = true;
+        
+        const formData = new FormData();
+        formData.append('action', 'validate_coffee_break');
+        formData.append('story_id', storyId);
+        
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('<i class="fas fa-coffee"></i> Pause café validée ! Session sauvegardée.', 'info');
+            closeRevealModal();
+            
+            // Pour le Scrum Master, recharger la page après un court délai
+            setTimeout(() => {
+                isValidating = false;
+                location.reload();
+            }, 500);
+        } else {
+            showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
+            isValidating = false;
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('<i class="fas fa-times-circle"></i> Erreur lors de la validation', 'error');
+        isValidating = false;
+    }
+}
+
+/**
+ * Reprendre après la pause café (Scrum Master)
+ */
+async function resumeCoffeeBreak() {
+    if (!isScrumMaster) {
+        showNotification('<i class="fas fa-times-circle"></i> Action réservée au Scrum Master', 'error');
+        return;
+    }
+
+    if (isValidating) {
+        console.log('Opération déjà en cours...');
+        return;
+    }
+
+    isValidating = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'resume_coffee_break');
+        
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('<i class="fas fa-play"></i> Reprise du vote !', 'success');
+            
+            // Recharger la page pour afficher la nouvelle story
+            setTimeout(() => {
+                isValidating = false;
+                location.reload();
+            }, 500);
+        } else {
+            showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
+            isValidating = false;
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('<i class="fas fa-times-circle"></i> Erreur lors de la reprise', 'error');
         isValidating = false;
     }
 }
@@ -531,6 +655,18 @@ async function updateSessionState() {
                         displayRevealModalReadOnly(revealData);
                     }
                 }
+            }
+            
+            // STATUS PAUSE CAFÉ → Afficher le modal pour tous
+            if (statusChanged && data.session.status === 'coffee_break' && !isInitialLoad && !isModalOpen) {
+                console.log('Statut coffee_break détecté');
+                
+                if (!isScrumMaster) {
+                    showNotification('<i class="fas fa-coffee"></i> Pause café validée par le Scrum Master !', 'info');
+                }
+                
+                // Désactiver les cartes de vote pour tout le monde
+                disableVotingInterface();
             }
             
             // RETOUR EN VOTING (revote) → Fermer la modale pour tous
@@ -989,6 +1125,26 @@ function updateCurrentStory(story) {
     } else {
         console.log('Story card non trouvée, création de la section story');
         showStorySection(story);
+    }
+}
+
+/**
+ * Réinitialiser l'interface de vote
+ */
+/**
+ * Désactiver l'interface de vote (pause café)
+ */
+function disableVotingInterface() {
+    // Désactiver toutes les cartes
+    document.querySelectorAll('.card-vote').forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+    });
+    
+    // Désactiver le bouton Révéler
+    const revealBtn = document.querySelector('button[onclick*="revealVotes"]');
+    if (revealBtn) {
+        revealBtn.disabled = true;
     }
 }
 

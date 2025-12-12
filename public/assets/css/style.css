@@ -1714,3 +1714,68 @@ a:focus-visible {
         display: none !important;
     }
 }
+/* Notice de pause café */
+.coffee-break-notice {
+    background: linear-gradient(135deg, #6b4423 0%, #8b5a3c 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.coffee-break-notice i {
+    font-size: 2em;
+    display: block;
+    margin-bottom: 10px;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.coffee-break-notice strong {
+    font-size: 1.3em;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.coffee-break-notice p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Bouton Reprendre */
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+.btn-success:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-success i {
+    margin-right: 8px;
+}

@@ -172,10 +172,10 @@ if ($currentStory) {
                     ];
                     foreach ($cards as $card): 
                     ?>
-                        <button class="card-vote <?php echo $hasVoted ? 'disabled' : ''; ?>" 
+                        <button class="card-vote <?php echo ($hasVoted || $session->status === 'coffee_break') ? 'disabled' : ''; ?>" 
                                 data-value="<?php echo $card['value']; ?>"
                                 onclick="voteCard('<?php echo $card['value']; ?>')"
-                                <?php echo $hasVoted ? 'disabled' : ''; ?>>
+                                <?php echo ($hasVoted || $session->status === 'coffee_break') ? 'disabled' : ''; ?>>
                             <span class="card-value"><?php echo $card['display']; ?></span>
                         </button>
                     <?php endforeach; ?>
@@ -187,12 +187,26 @@ if ($currentStory) {
                     </div>
                 <?php endif; ?>
 
+                <?php if ($session->status === 'coffee_break'): ?>
+                    <div class="coffee-break-notice">
+                        <i class="fas fa-coffee"></i> 
+                        <strong>Pause café en cours</strong>
+                        <p>Les votes sont bloqués. Le Scrum Master reprendra la session.</p>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($player->is_scrum_master): ?>
                     <div class="sm-actions">
-                        <button onclick="revealVotes()" class="btn btn-primary" data-vote-count
-                                <?php echo $voteCount === 0 ? 'disabled' : ''; ?>>
-                            <i class="fas fa-eye"></i> Révéler les votes (<span id="vote-counter"><?php echo $voteCount; ?></span>)
-                        </button>
+                        <?php if ($session->status === 'coffee_break'): ?>
+                            <button onclick="resumeCoffeeBreak()" class="btn btn-success">
+                                <i class="fas fa-play"></i> Reprendre le vote
+                            </button>
+                        <?php else: ?>
+                            <button onclick="revealVotes()" class="btn btn-primary" data-vote-count
+                                    <?php echo $voteCount === 0 ? 'disabled' : ''; ?>>
+                                <i class="fas fa-eye"></i> Révéler les votes (<span id="vote-counter"><?php echo $voteCount; ?></span>)
+                            </button>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </div>

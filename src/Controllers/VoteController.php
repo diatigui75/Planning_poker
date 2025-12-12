@@ -19,9 +19,16 @@ class VoteController
 {
     public static function submitVote(PDO $pdo, int $sessionId, int $playerId, string $value): array
     {
+        $session = Session::findById($pdo, $sessionId);
         $story = UserStory::findCurrent($pdo, $sessionId);
+        
         if (!$story) {
             return ['success' => false, 'error' => 'Aucune story en cours'];
+        }
+
+        // Bloquer les votes si on est en pause café
+        if ($session->status === 'coffee_break') {
+            return ['success' => false, 'error' => 'Vote bloqué : pause café en cours'];
         }
 
         // Mettre le statut de la story à "voting" si c'est le premier vote
@@ -54,6 +61,14 @@ class VoteController
         $session = Session::findById($pdo, $sessionId);
         $story = UserStory::findCurrent($pdo, $sessionId);
         
+        // Bloquer si on est déjà en pause café
+        if ($session->status === 'coffee_break') {
+            return [
+                'success' => false,
+                'error' => 'Pause café en cours',
+            ];
+        }
+        
         if (!$story) {
             return ['story' => null, 'votes' => [], 'result' => null];
         }
@@ -61,17 +76,31 @@ class VoteController
         $rows = Vote::getVotes($pdo, $sessionId, $story->id, 1);
         $votes = array_column($rows, 'vote_value');
 
-        // Appliquer la règle de vote
+        // Vérifier si c'est une pause café (TOUS les votes doivent être "cafe")
+        $isCoffeeBreak = !empty($votes) && count(array_filter($votes, fn($v) => $v === 'cafe')) === count($votes);
+
+        if ($isCoffeeBreak) {
+            // Changer le statut de la session en 'revealed' d'abord pour afficher la modale
+            // Le SM pourra ensuite valider pour passer en 'coffee_break'
+            $session->setStatus($pdo, 'revealed');
+            
+            return [
+                'story' => $story,
+                'votes' => $rows,
+                'result' => [
+                    'valid' => true,
+                    'coffee_break' => true,
+                    'value' => 'cafe',
+                    'reason' => 'Pause café unanime',
+                ],
+            ];
+        }
+
+        // Appliquer la règle de vote normale
         $result = VoteRulesService::computeResult($votes, $session->vote_rule);
 
-        // IMPORTANT : On change SEULEMENT le statut à 'revealed'
-        // On NE valide PAS l'estimation ici (c'est fait dans validateEstimation)
+        // Changer SEULEMENT le statut à 'revealed'
         $session->setStatus($pdo, 'revealed');
-        
-        // Si c'est une pause café, on le signale
-        if (in_array('cafe', $votes)) {
-            $result['coffee_break'] = true;
-        }
 
         return [
             'story' => $story,
@@ -126,9 +155,9 @@ class VoteController
         if ($nextData) {
             // Il y a une story suivante
             $nextStory = UserStory::fromArray($nextData);
-            $nextStory->setStatus($pdo, 'voting'); // CHANGEMENT ICI: mettre directement en 'voting'
+            $nextStory->setStatus($pdo, 'voting');
             $session->setCurrentStory($pdo, $nextStory->id);
-            $session->setStatus($pdo, 'voting'); // CHANGEMENT ICI: mettre directement en 'voting'
+            $session->setStatus($pdo, 'voting');
             
             return ['success' => true, 'message' => 'Estimation validée', 'has_next' => true];
         } else {
@@ -137,6 +166,76 @@ class VoteController
             $session->setStatus($pdo, 'finished');
             
             return ['success' => true, 'message' => 'Toutes les stories sont estimées !', 'has_next' => false];
+        }
+    }
+
+    public static function validateCoffeeBreak(PDO $pdo, int $sessionId, int $storyId): array
+    {
+        $story = UserStory::findById($pdo, $storyId);
+        if (!$story || $story->session_id !== $sessionId) {
+            return ['success' => false, 'error' => 'Story introuvable'];
+        }
+
+        $session = Session::findById($pdo, $sessionId);
+
+        // Garder le statut coffee_break et rester sur la même story
+        // Ne PAS supprimer les votes pour pouvoir les afficher
+        $session->setStatus($pdo, 'coffee_break');
+        
+        return [
+            'success' => true, 
+            'message' => 'Pause café validée ! Les votes sont bloqués.', 
+            'coffee_break_active' => true
+        ];
+    }
+
+    public static function resumeFromCoffeeBreak(PDO $pdo, int $sessionId): array
+    {
+        $session = Session::findById($pdo, $sessionId);
+        $story = UserStory::findCurrent($pdo, $sessionId);
+        
+        if (!$story) {
+            return ['success' => false, 'error' => 'Aucune story en cours'];
+        }
+
+        // Supprimer les votes de la story actuelle (pause café terminée)
+        Vote::clearVotes($pdo, $sessionId, $story->id, 1);
+        
+        // Marquer la story comme ignorée/passée (sans estimation)
+        $story->setStatus($pdo, 'estimated');
+        
+        // Chercher la prochaine story non estimée
+        $stmt = $pdo->prepare("
+            SELECT * FROM user_stories 
+            WHERE session_id = :sid AND status = 'pending'
+            ORDER BY order_index ASC 
+            LIMIT 1
+        ");
+        $stmt->execute([':sid' => $sessionId]);
+        $nextData = $stmt->fetch();
+        
+        if ($nextData) {
+            // Il y a une story suivante
+            $nextStory = UserStory::fromArray($nextData);
+            $nextStory->setStatus($pdo, 'voting');
+            $session->setCurrentStory($pdo, $nextStory->id);
+            $session->setStatus($pdo, 'voting');
+            
+            return [
+                'success' => true, 
+                'message' => 'Pause café terminée, reprise du vote !', 
+                'has_next' => true
+            ];
+        } else {
+            // Plus de stories à estimer
+            $session->setCurrentStory($pdo, null);
+            $session->setStatus($pdo, 'finished');
+            
+            return [
+                'success' => true, 
+                'message' => 'Pause café terminée, toutes les stories sont estimées !', 
+                'has_next' => false
+            ];
         }
     }
 
@@ -166,10 +265,23 @@ class VoteController
                 'votes' => $votes,
             ];
             
-            // Si le statut est 'revealed', calculer le résultat du vote
-            if ($session->status === 'revealed' && count($votes) > 0) {
+            // Si le statut est 'revealed' ou 'coffee_break', calculer le résultat du vote
+            if (in_array($session->status, ['revealed', 'coffee_break']) && count($votes) > 0) {
                 $voteValues = array_column($votes, 'vote_value');
-                $voteResult = VoteRulesService::computeResult($voteValues, $session->vote_rule);
+                
+                // Vérifier si c'est une pause café
+                $isCoffeeBreak = count(array_filter($voteValues, fn($v) => $v === 'cafe')) === count($voteValues);
+                
+                if ($isCoffeeBreak) {
+                    $voteResult = [
+                        'valid' => true,
+                        'coffee_break' => true,
+                        'value' => 'cafe',
+                        'reason' => 'Pause café unanime',
+                    ];
+                } else {
+                    $voteResult = VoteRulesService::computeResult($voteValues, $session->vote_rule);
+                }
             }
         }
 
