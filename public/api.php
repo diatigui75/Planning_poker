@@ -59,6 +59,7 @@ try {
                         'id' => $story->id,
                         'story_id' => $story->story_id,
                         'title' => $story->title,
+                        'description' => $story->description,
                         'priority' => $story->priority,
                         'estimation' => $story->estimation,
                         'status' => $story->status,

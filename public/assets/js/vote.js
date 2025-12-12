@@ -413,12 +413,28 @@ async function resumeCoffeeBreak() {
         const data = await response.json();
         
         if (data.success) {
-            showNotification('<i class="fas fa-play"></i> Reprise du vote !', 'success');
+            showNotification('<i class="fas fa-play"></i> Reprise du vote ! Vous pouvez maintenant voter pour estimer cette story.', 'success');
             
-            // Recharger la page pour afficher la nouvelle story
+            // Réactiver l'interface de vote sans recharger
+            enableVotingInterface();
+            
+            // Masquer le bandeau de pause café
+            hideCoffeeBreakBanner();
+            
+            // Remplacer le bouton "Reprendre" par le bouton "Révéler"
+            const smActions = document.querySelector('.sm-actions');
+            if (smActions) {
+                smActions.innerHTML = `
+                    <button onclick="revealVotes()" class="btn btn-primary" data-vote-count disabled>
+                        <i class="fas fa-eye"></i> Révéler les votes (<span id="vote-counter">0</span>)
+                    </button>
+                `;
+            }
+            
+            // Forcer une mise à jour de l'état
             setTimeout(() => {
                 isValidating = false;
-                location.reload();
+                updateSessionState();
             }, 500);
         } else {
             showNotification('<i class="fas fa-times-circle"></i> ' + data.error, 'error');
@@ -657,9 +673,14 @@ async function updateSessionState() {
                 }
             }
             
-            // STATUS PAUSE CAFÉ → Afficher le modal pour tous
-            if (statusChanged && data.session.status === 'coffee_break' && !isInitialLoad && !isModalOpen) {
+            // STATUS PAUSE CAFÉ → Fermer la modale et désactiver l'interface pour tous
+            if (statusChanged && data.session.status === 'coffee_break' && !isInitialLoad) {
                 console.log('Statut coffee_break détecté');
+                
+                // Fermer la modale si elle est ouverte (pour tous les utilisateurs)
+                if (isModalOpen) {
+                    closeRevealModal();
+                }
                 
                 if (!isScrumMaster) {
                     showNotification('<i class="fas fa-coffee"></i> Pause café validée par le Scrum Master !', 'info');
@@ -667,10 +688,32 @@ async function updateSessionState() {
                 
                 // Désactiver les cartes de vote pour tout le monde
                 disableVotingInterface();
+                
+                // Afficher le bandeau de pause café dynamiquement
+                showCoffeeBreakBanner();
+            }
+            
+            // REPRISE APRÈS PAUSE CAFÉ → Réactiver l'interface
+            if (statusChanged && lastSessionStatus === 'coffee_break' && data.session.status === 'voting' && !isInitialLoad) {
+                console.log('Reprise après pause café détectée');
+                
+                if (!isScrumMaster) {
+                    showNotification('<i class="fas fa-play"></i> Reprise du vote ! Vous pouvez maintenant voter.', 'success');
+                }
+                
+                // Réactiver l'interface de vote
+                enableVotingInterface();
+                
+                // Masquer le bandeau de pause café dynamiquement
+                hideCoffeeBreakBanner();
+                
+                // Pour les non-SM, remplacer le message par le bouton Révéler (sera fait par le polling)
+                // Réinitialiser l'interface de vote
+                resetVotingInterface();
             }
             
             // RETOUR EN VOTING (revote) → Fermer la modale pour tous
-            if (statusChanged && data.session.status === 'voting' && !isInitialLoad) {
+            if (statusChanged && data.session.status === 'voting' && lastSessionStatus !== 'coffee_break' && !isInitialLoad) {
                 console.log('Revote détecté');
                 
                 // Fermer la modale si elle est ouverte
@@ -704,6 +747,32 @@ async function updateSessionState() {
             if (newVotes && !isInitialLoad) {
                 console.log('Nouveaux votes détectés');
                 playNotificationSound();
+            }
+            
+            // Gérer l'affichage du bandeau de pause café au chargement initial
+            if (isInitialLoad && data.session.status === 'coffee_break') {
+                console.log('Page chargée en pause café, affichage du bandeau');
+                disableVotingInterface();
+                showCoffeeBreakBanner();
+            }
+            
+            // Vérification continue de l'état du bandeau (pas seulement au changement)
+            // Cela garantit que le bandeau est toujours synchronisé avec le statut réel
+            if (!isInitialLoad) {
+                const banner = document.querySelector('.coffee-break-notice');
+                const bannerVisible = banner && banner.style.display !== 'none';
+                
+                // Si on est en pause café mais le bandeau n'est pas visible
+                if (data.session.status === 'coffee_break' && !bannerVisible) {
+                    console.log('Bandeau manquant détecté, affichage');
+                    showCoffeeBreakBanner();
+                }
+                
+                // Si on n'est PAS en pause café mais le bandeau est visible
+                if (data.session.status !== 'coffee_break' && bannerVisible) {
+                    console.log('Bandeau superflu détecté, masquage');
+                    hideCoffeeBreakBanner();
+                }
             }
             
         } else {
@@ -1149,6 +1218,90 @@ function disableVotingInterface() {
 }
 
 /**
+ * Réactiver l'interface de vote (fin de pause café)
+ */
+function enableVotingInterface() {
+    // Réactiver toutes les cartes
+    document.querySelectorAll('.card-vote').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+    });
+    
+    // Réactiver le bouton Révéler
+    const revealBtn = document.querySelector('button[onclick*="revealVotes"]');
+    if (revealBtn) {
+        revealBtn.disabled = false;
+    }
+}
+
+/**
+ * Afficher le bandeau de pause café
+ */
+function showCoffeeBreakBanner() {
+    // Vérifier si le bandeau existe déjà
+    let banner = document.querySelector('.coffee-break-notice');
+    
+    if (!banner) {
+        // Créer le bandeau s'il n'existe pas
+        console.log('Création du bandeau de pause café');
+        banner = document.createElement('div');
+        banner.className = 'coffee-break-notice';
+        banner.innerHTML = `
+            <i class="fas fa-coffee"></i>
+            <strong>Pause café en cours</strong>
+            <p>Les votes sont bloqués. Le Scrum Master reprendra la session.</p>
+        `;
+        
+        // Insérer le bandeau après la confirmation de vote ou avant les actions SM
+        const votingSection = document.querySelector('.voting-section');
+        if (votingSection) {
+            const voteConfirmation = votingSection.querySelector('.vote-confirmation');
+            const smActions = votingSection.querySelector('.sm-actions');
+            
+            if (voteConfirmation) {
+                // Insérer après la confirmation de vote
+                voteConfirmation.insertAdjacentElement('afterend', banner);
+            } else if (smActions) {
+                // Insérer avant les actions SM
+                smActions.insertAdjacentElement('beforebegin', banner);
+            } else {
+                // Insérer à la fin de la section de vote
+                votingSection.appendChild(banner);
+            }
+        }
+    } else {
+        console.log('Affichage du bandeau existant');
+    }
+    
+    // S'assurer qu'il est visible
+    banner.style.display = 'block';
+    banner.style.opacity = '1';
+    
+    // Animation d'apparition
+    banner.style.animation = 'fadeIn 0.5s ease-out';
+}
+
+/**
+ * Masquer le bandeau de pause café
+ */
+function hideCoffeeBreakBanner() {
+    const banner = document.querySelector('.coffee-break-notice');
+    if (banner) {
+        console.log('Masquage du bandeau de pause café');
+        // Animation de disparition
+        banner.style.animation = 'fadeOut 0.3s ease-out';
+        
+        // Attendre la fin de l'animation avant de masquer
+        setTimeout(() => {
+            banner.style.display = 'none';
+            banner.style.opacity = '0';
+        }, 300);
+    } else {
+        console.log('Aucun bandeau à masquer');
+    }
+}
+
+/**
  * Réinitialiser l'interface de vote
  */
 function resetVotingInterface() {
@@ -1478,7 +1631,8 @@ function displayBacklogInModal(stories) {
     
     stories.forEach(story => {
         const statusIcon = story.status === 'estimated' ? '<i class="fas fa-check-circle"></i>' : 
-                          story.status === 'voting' ? '<i class="fas fa-clock"></i>' : '⏸️';
+                          story.status === 'voting' ? '<i class="fas fa-spinner fa-pulse"></i>' : 
+                          '<i class="fas fa-hourglass-half"></i>';
         const statusClass = story.status === 'estimated' ? 'estimated' : 
                            story.status === 'voting' ? 'voting' : 'pending';
         
@@ -1488,6 +1642,11 @@ function displayBacklogInModal(stories) {
                     <span class="backlog-item-id">${escapeHtml(story.story_id)}</span>
                     <span class="backlog-item-title">${escapeHtml(story.title)}</span>
                 </div>
+                ${story.description ? `
+                    <div class="backlog-item-description">
+                        ${escapeHtml(story.description)}
+                    </div>
+                ` : ''}
                 <div class="backlog-item-footer">
                     <span class="backlog-item-priority priority-${story.priority}">
                         ${story.priority.charAt(0).toUpperCase() + story.priority.slice(1)}

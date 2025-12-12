@@ -198,45 +198,20 @@ class VoteController
             return ['success' => false, 'error' => 'Aucune story en cours'];
         }
 
-        // Supprimer les votes de la story actuelle (pause café terminée)
+        // Supprimer les votes de la pause café (pour permettre un nouveau vote)
         Vote::clearVotes($pdo, $sessionId, $story->id, 1);
         
-        // Marquer la story comme ignorée/passée (sans estimation)
-        $story->setStatus($pdo, 'estimated');
+        // Remettre la story en mode 'voting' (elle était restée en 'voting' pendant la pause)
+        $story->setStatus($pdo, 'voting');
         
-        // Chercher la prochaine story non estimée
-        $stmt = $pdo->prepare("
-            SELECT * FROM user_stories 
-            WHERE session_id = :sid AND status = 'pending'
-            ORDER BY order_index ASC 
-            LIMIT 1
-        ");
-        $stmt->execute([':sid' => $sessionId]);
-        $nextData = $stmt->fetch();
+        // Remettre la session en mode 'voting'
+        $session->setStatus($pdo, 'voting');
         
-        if ($nextData) {
-            // Il y a une story suivante
-            $nextStory = UserStory::fromArray($nextData);
-            $nextStory->setStatus($pdo, 'voting');
-            $session->setCurrentStory($pdo, $nextStory->id);
-            $session->setStatus($pdo, 'voting');
-            
-            return [
-                'success' => true, 
-                'message' => 'Pause café terminée, reprise du vote !', 
-                'has_next' => true
-            ];
-        } else {
-            // Plus de stories à estimer
-            $session->setCurrentStory($pdo, null);
-            $session->setStatus($pdo, 'finished');
-            
-            return [
-                'success' => true, 
-                'message' => 'Pause café terminée, toutes les stories sont estimées !', 
-                'has_next' => false
-            ];
-        }
+        return [
+            'success' => true, 
+            'message' => 'Pause café terminée ! Les joueurs peuvent maintenant voter pour estimer cette story.', 
+            'same_story' => true
+        ];
     }
 
     public static function getSessionState(PDO $pdo, int $sessionId, int $playerId): array

@@ -607,12 +607,12 @@ form a.btn-back {
 }
 
 .btn-success {
-    background: var(--success-color);    /* Noir */
+    background: #28a745;        /* Vert uni simple */
     color: white;
 }
 
 .btn-success:hover {
-    background: var(--gray-90);          /* Gris très foncé */
+    background: #218838;        /* Vert légèrement plus foncé */
 }
 
 .btn-warning {
@@ -1062,7 +1062,12 @@ form a.btn-back {
     gap: 12px;
     margin-top: 24px;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;  /* Empêcher le retour à la ligne */
+}
+
+.modal-actions .btn {
+    flex: 1;
+    max-width: 200px;  /* Limiter la largeur maximale */
 }
 
 .form-group {
@@ -1498,6 +1503,17 @@ a:focus-visible {
     font-size: 0.875rem;
 }
 
+.backlog-item-description {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: var(--bg-white);
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    border-left: 2px solid var(--border-subtle);
+}
+
 .backlog-item-footer {
     display: flex;
     justify-content: space-between;
@@ -1753,9 +1769,9 @@ a:focus-visible {
     }
 }
 
-/* Bouton Reprendre */
+/* Bouton Reprendre et autres boutons verts */
 .btn-success {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #28a745;  /* Vert uni simple */
     color: white;
     border: none;
     padding: 12px 24px;
@@ -1768,14 +1784,69 @@ a:focus-visible {
 }
 
 .btn-success:hover:not(:disabled) {
+    background: #218838;  /* Vert légèrement plus foncé au survol */
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
 }
 
 .btn-success:active:not(:disabled) {
+    background: #1e7e34;  /* Vert encore plus foncé au clic */
     transform: translateY(0);
 }
 
 .btn-success i {
     margin-right: 8px;
+}
+
+/* Bouton Valider la pause café (même style vert que btn-success) */
+.btn-info {
+    background: #28a745;  /* Vert uni simple */
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-info:hover:not(:disabled) {
+    background: #218838;  /* Vert légèrement plus foncé au survol */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+.btn-info:active:not(:disabled) {
+    background: #1e7e34;  /* Vert encore plus foncé au clic */
+    transform: translateY(0);
+}
+
+.btn-info i {
+    margin-right: 8px;
+}
+
+
+/* Animation de disparition */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
