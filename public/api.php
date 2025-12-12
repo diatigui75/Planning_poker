@@ -30,16 +30,19 @@ try {
     require_once __DIR__ . '/../src/Models/Player.php';
     require_once __DIR__ . '/../src/Models/UserStory.php';
     require_once __DIR__ . '/../src/Models/Vote.php';
+    require_once __DIR__ . '/../src/Models/Message.php';
     require_once __DIR__ . '/../src/Services/VoteRulesService.php';
     require_once __DIR__ . '/../src/Services/JsonManager.php';
     require_once __DIR__ . '/../src/Controllers/VoteController.php';
     require_once __DIR__ . '/../src/Controllers/BacklogController.php';
+    require_once __DIR__ . '/../src/Controllers/ChatController.php';
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'error' => 'Erreur chargement: ' . $e->getMessage()]);
 }
 
 use App\Controllers\VoteController;
 use App\Controllers\BacklogController;
+use App\Controllers\ChatController;
 
 $pdo = getPDO();
 $action = $_REQUEST['action'] ?? '';
@@ -211,6 +214,27 @@ try {
                 jsonResponse(['success' => false, 'error' => 'Action réservée au Scrum Master']);
             }
             BacklogController::saveSession($pdo, $_SESSION['session_id']);
+            break;
+
+        case 'send_message':
+            $content = $_POST['content'] ?? '';
+            if (empty($content)) {
+                jsonResponse(['success' => false, 'error' => 'Message vide']);
+            }
+            $result = ChatController::sendMessage($pdo, $_SESSION['session_id'], $_SESSION['player_id'], $content);
+            jsonResponse($result);
+            break;
+
+        case 'get_messages':
+            $sinceId = isset($_GET['since_id']) ? (int)$_GET['since_id'] : 0;
+            $result = ChatController::getMessages($pdo, $_SESSION['session_id'], $sinceId);
+            jsonResponse($result);
+            break;
+
+        case 'get_unread_count':
+            $lastSeenId = isset($_GET['last_seen_id']) ? (int)$_GET['last_seen_id'] : 0;
+            $result = ChatController::getUnreadCount($pdo, $_SESSION['session_id'], $lastSeenId);
+            jsonResponse($result);
             break;
 
         default:

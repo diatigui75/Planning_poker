@@ -39,6 +39,7 @@ if ($currentStory) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vote - Planning Poker</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="assets/css/chat.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -292,6 +293,54 @@ window.addEventListener('load', adjustContentPadding);
 
 </script>
 <script src="assets/js/vote.js?v=<?php echo time(); ?>"></script>
+<script src="assets/js/chat.js?v=<?php echo time(); ?>"></script>
+
+<!-- Chat flottant -->
+<button class="chat-float-btn" id="chat-icon" onclick="toggleChat()" title="Chat de l'équipe">
+    <i class="fas fa-comments"></i>
+    <span class="chat-unread-badge" id="chat-unread-badge">0</span>
+</button>
+
+<!-- Panneau du chat -->
+<div class="chat-panel" id="chat-panel">
+    <div class="chat-header">
+        <div class="chat-header-left">
+            <div>
+                <h3 class="chat-header-title">Chat de l'équipe</h3>
+                <span class="chat-online-count" id="chat-online-count"><?php echo count($players); ?> en ligne</span>
+            </div>
+        </div>
+        <button class="chat-close-btn" onclick="toggleChat()" title="Fermer">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+        <div class="chat-empty">
+            <i class="fas fa-comments"></i>
+            <p>Aucun message pour le moment</p>
+            <p style="font-size: 0.75rem; opacity: 0.7;">Soyez le premier à écrire !</p>
+        </div>
+    </div>
+    
+    <form class="chat-form" id="chat-form">
+        <div class="chat-input-wrapper">
+            <textarea 
+                class="chat-input" 
+                id="chat-input" 
+                placeholder="Écrivez un message... "
+                rows="1"
+                maxlength="1000"
+            ></textarea>
+           
+        </div>
+    </form>
+</div>
+
+<script>
+// Exposer l'ID du joueur pour le chat
+const PLAYER_ID = <?php echo $player->id; ?>;
+</script>
 
 </body>
 </html>

@@ -864,6 +864,11 @@ function updatePlayersList(players, voteInfo) {
                 showNotification('<i class="fas fa-user"></i> Un nouveau joueur a rejoint !', 'info');
                 playNotificationSound();
             }
+            
+            // Mettre à jour le compteur dans le chat
+            if (typeof updateChatOnlineCount === 'function') {
+                updateChatOnlineCount(newCount);
+            }
         }
     }
     
