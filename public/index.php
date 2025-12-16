@@ -95,6 +95,27 @@
                     <li><strong><i class="fas fa-coffee"></i></strong> : Pause nécessaire</li>
                 </ul>
             </section>
+            <section class="rule-section">
+                <h4>Import du Backlog</h4>
+                <p>Le Scrum Master peut importer un fichier JSON contenant les User Stories à estimer.</p>
+                <p><strong>Exemple de fichier JSON :</strong></p>
+                <pre style="background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.9em; color: #000;">{
+    "stories": [
+        {
+            "id": "US001",
+            "titre": "Créer la page d'accueil",
+            "description": "Afficher un menu principal avec options 'Créer session', 'Rejoindre session'.",
+            "priorite": "haute"
+        },
+        {
+            "id": "US002",
+            "titre": "Gestion des sessions",
+            "description": "Permettre au Scrum Master de créer une session avec pseudo et nombre de joueurs.",
+            "priorite": "haute"
+        }
+    ]
+}</pre>
+            </section>
 
             <section class="rule-section">
                 <h4>Conseils pratiques</h4>
