@@ -33,7 +33,9 @@
             </markers>
         </api>
     </version>
-    <template name="default"/>
+    <template name="default">
+        <parameter key="base-url" value="/"/>
+    </template>
     <setting name="graphs.enabled" value="true"/>
     <setting name="theme.name" value="default"/>
 </phpdocumentor>
