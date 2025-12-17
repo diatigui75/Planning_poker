@@ -4,6 +4,7 @@ node_modules/
 
 # Configuration locale
 /config/config.php
+/config/config.test.php
 .env
 
 # Fichiers générés
@@ -23,3 +24,5 @@ Thumbs.db
 # Tests
 /tests/coverage/
 .phpunit.result.cache
+/tests/.phpunit.cache/
+/.phpdoc/cache/

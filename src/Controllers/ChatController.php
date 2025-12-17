@@ -5,10 +5,28 @@ use App\Models\Message;
 use App\Models\Player;
 use PDO;
 
+/**
+ * Contrôleur de gestion du système de chat
+ * 
+ * Gère l'envoi et la réception des messages du chat de session,
+ * ainsi que le suivi des messages non lus.
+ * 
+ * @package App\Controllers
+ * @author Melissa Aliouche
+ */
 class ChatController
 {
     /**
-     * Envoyer un message dans le chat
+     * Envoie un message dans le chat de la session
+     * 
+     * Vérifie l'existence du joueur, valide le contenu du message
+     * (longueur, non vide) et l'enregistre dans la base de données.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @param int $playerId Identifiant du joueur émetteur
+     * @param string $content Contenu du message (max 1000 caractères)
+     * @return array{success: bool, message?: string, error?: string} Résultat de l'envoi
      */
     public static function sendMessage(PDO $pdo, int $sessionId, int $playerId, string $content): array
     {
@@ -44,7 +62,15 @@ class ChatController
     }
 
     /**
-     * Récupérer les messages du chat
+     * Récupère les messages du chat d'une session
+     * 
+     * Retourne les 50 derniers messages de la session, avec possibilité
+     * de ne récupérer que les messages postérieurs à un ID donné (polling).
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @param int $sinceId ID du dernier message reçu (0 pour tout récupérer)
+     * @return array{success: bool, messages?: array<array>, count?: int, error?: string} Liste des messages ou erreur
      */
     public static function getMessages(PDO $pdo, int $sessionId, int $sinceId = 0): array
     {
@@ -65,7 +91,15 @@ class ChatController
     }
 
     /**
-     * Récupérer le nombre de messages non lus
+     * Compte le nombre de messages non lus
+     * 
+     * Calcule combien de messages ont été postés dans la session
+     * depuis le dernier message vu par le joueur.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @param int $lastSeenMessageId ID du dernier message vu par le joueur
+     * @return array{success: bool, unread_count?: int, error?: string} Nombre de messages non lus ou erreur
      */
     public static function getUnreadCount(PDO $pdo, int $sessionId, int $lastSeenMessageId): array
     {

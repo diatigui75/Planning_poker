@@ -3,6 +3,12 @@
     "description": "Application Planning Poker avec PHP/MySQL",
     "type": "project",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Melissa Aliouche",
+            "email": "melissa.aliouche@example.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "App\\": "src/"
@@ -14,14 +20,55 @@
         }
     },
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
-        "phpdocumentor/phpdocumentor": "^3.0"
+        "phpdocumentor/phpdocumentor": "^3.0",
+        "squizlabs/php_codesniffer": "^3.7",
+        "phpstan/phpstan": "^1.10"
     },
     "scripts": {
-        "test": "phpunit tests",
-        "docs": "phpdoc -d src -t docs"
-    }
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html tests/coverage --coverage-clover tests/coverage/clover.xml",
+        "test:filter": "phpunit --filter",
+        "docs": "phpdoc run -d src -t docs --title=\"Planning Poker API\" --ignore=\"vendor/,tests/,cache/\" --template=\"default\"",
+        "cs": "phpcs",
+        "cs:fix": "phpcbf",
+        "stan": "phpstan analyse",
+        "check": [
+            "@test",
+            "@cs",
+            "@stan"
+        ],
+        "ci": [
+            "@test:coverage",
+            "@cs",
+            "@stan",
+            "@docs"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Exécute tous les tests PHPUnit",
+        "test:coverage": "Exécute les tests avec rapport de couverture",
+        "test:filter": "Exécute les tests avec filtre",
+        "docs": "Génère la documentation avec PHPDocumentor",
+        "cs": "Vérifie le style de code avec PHP_CodeSniffer",
+        "cs:fix": "Corrige automatiquement les erreurs de style",
+        "stan": "Analyse statique avec PHPStan",
+        "check": "Lance tous les contrôles de qualité",
+        "ci": "Script complet pour l'intégration continue"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

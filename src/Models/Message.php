@@ -4,17 +4,44 @@ namespace App\Models;
 
 use PDO;
 
+/**
+ * Modèle de gestion des messages du chat
+ * 
+ * Représente un message envoyé dans le chat d'une session Planning Poker.
+ * Gère la persistance, la récupération et la suppression des messages.
+ * 
+ * @package App\Models
+ * @author Melissa Aliouche
+ */
 class Message
 {
+    /** @var int Identifiant unique du message */
     public int $id;
+    
+    /** @var int Identifiant de la session à laquelle appartient le message */
     public int $session_id;
+    
+    /** @var int Identifiant du joueur auteur du message */
     public int $player_id;
+    
+    /** @var string Pseudo du joueur auteur */
     public string $player_name;
+    
+    /** @var string Contenu du message (max 1000 caractères) */
     public string $content;
+    
+    /** @var string Date et heure de création du message (format timestamp) */
     public string $created_at;
 
     /**
-     * Créer la table messages si elle n'existe pas
+     * Crée la table messages dans la base de données si elle n'existe pas
+     * 
+     * Initialise la structure de la table avec les clés étrangères vers
+     * sessions et players, et crée les index pour optimiser les requêtes.
+     * Utilise le moteur InnoDB avec encodage UTF-8.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @return void
      */
     public static function createTable(PDO $pdo): void
     {
@@ -34,7 +61,16 @@ class Message
     }
 
     /**
-     * Envoyer un message
+     * Envoie un message dans le chat d'une session
+     * 
+     * Valide le contenu (non vide et maximum 1000 caractères),
+     * le nettoie et l'insère dans la base de données.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @param int $playerId Identifiant du joueur émetteur
+     * @param string $content Contenu du message à envoyer
+     * @return bool True si l'envoi a réussi, false si validation échouée ou erreur
      */
     public static function send(PDO $pdo, int $sessionId, int $playerId, string $content): bool
     {
@@ -58,7 +94,17 @@ class Message
     }
 
     /**
-     * Récupérer les messages d'une session
+     * Récupère les messages d'une session avec informations des auteurs
+     * 
+     * Retourne une liste de messages avec le pseudo et le statut (Scrum Master)
+     * de chaque auteur. Supporte le polling en ne récupérant que les messages
+     * postérieurs à un ID donné.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @param int $limit Nombre maximum de messages à récupérer (défaut: 50)
+     * @param int $sinceId ID du dernier message reçu, 0 pour tout récupérer (défaut: 0)
+     * @return array<array{id: int, session_id: int, player_id: int, content: string, created_at: string, player_name: string, is_scrum_master: bool}> Liste des messages avec détails des auteurs
      */
     public static function getMessages(PDO $pdo, int $sessionId, int $limit = 50, int $sinceId = 0): array
     {
@@ -96,7 +142,13 @@ class Message
     }
 
     /**
-     * Compter le nombre de messages dans une session
+     * Compte le nombre total de messages dans une session
+     * 
+     * Utile pour afficher des statistiques ou vérifier l'activité du chat.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @return int Nombre de messages dans la session
      */
     public static function countMessages(PDO $pdo, int $sessionId): int
     {
@@ -109,7 +161,14 @@ class Message
     }
 
     /**
-     * Supprimer les anciens messages (nettoyage)
+     * Supprime les messages anciens pour le nettoyage de la base
+     * 
+     * Fonction de maintenance pour supprimer automatiquement les messages
+     * plus vieux qu'un nombre de jours spécifié.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $daysOld Nombre de jours d'ancienneté (défaut: 7)
+     * @return int Nombre de messages supprimés
      */
     public static function deleteOldMessages(PDO $pdo, int $daysOld = 7): int
     {
@@ -123,7 +182,14 @@ class Message
     }
 
     /**
-     * Supprimer tous les messages d'une session
+     * Supprime tous les messages d'une session
+     * 
+     * Utilisé lors de la suppression d'une session ou pour réinitialiser
+     * le chat. La suppression en cascade est gérée par la base de données.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @param int $sessionId Identifiant de la session
+     * @return bool True si la suppression a réussi, false sinon
      */
     public static function deleteBySession(PDO $pdo, int $sessionId): bool
     {

@@ -9,8 +9,29 @@ use App\Models\Session;
 use App\Models\Player;
 use PDO;
 
+/**
+ * Contrôleur de gestion des sessions Planning Poker
+ * 
+ * Gère la création de nouvelles sessions et l'adhésion des joueurs
+ * aux sessions existantes. Configure les sessions PHP pour maintenir
+ * l'état de connexion des utilisateurs.
+ * 
+ * @package App\Controllers
+ * @author Melissa Aliouche
+ */
 class SessionController
 {
+    /**
+     * Crée une nouvelle session Planning Poker et son Scrum Master
+     * 
+     * Valide les données du formulaire, crée la session avec ses paramètres,
+     * enregistre le créateur comme Scrum Master, et initialise la session PHP.
+     * Redirige vers la page de vote en cas de succès, ou vers le formulaire
+     * de création avec un message d'erreur en cas d'échec.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @return void Effectue une redirection HTTP (pas de retour)
+     */
     public static function create(PDO $pdo): void
     {
         $name = trim($_POST['session_name'] ?? '');
@@ -35,6 +56,18 @@ class SessionController
         exit;
     }
 
+    /**
+     * Permet à un joueur de rejoindre une session existante
+     * 
+     * Valide le code de session et le pseudo, vérifie que la session existe,
+     * n'est pas pleine et que le pseudo n'est pas déjà utilisé. Crée le joueur
+     * en tant que participant (non Scrum Master) et initialise la session PHP.
+     * Redirige vers la page de vote en cas de succès, ou vers le formulaire
+     * de participation avec un message d'erreur approprié en cas d'échec.
+     *
+     * @param PDO $pdo Instance de connexion à la base de données
+     * @return void Effectue une redirection HTTP (pas de retour)
+     */
     public static function join(PDO $pdo): void
     {
         $code = strtoupper(trim($_POST['session_code'] ?? ''));
