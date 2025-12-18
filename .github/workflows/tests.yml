@@ -50,15 +50,26 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Create config file
+    - name: Create test config file
       run: |
-        cp config/config_exemple.php config/config.php
-        sed -i "s/'db_pass' => 'password'/'db_pass' => 'root'/g" config/config.php
-        sed -i "s/'db_name' => 'planning_poker'/'db_name' => 'planning_poker_test'/g" config/config.php
+        cat > config/config.test.php << 'PHPEOF'
+        <?php
+        return [
+            'db_host' => '127.0.0.1',
+            'db_port' => 3306,
+            'db_name' => 'planning_poker_test',
+            'db_user' => 'root',
+            'db_pass' => 'root',
+            'base_url' => '/Planning_poker/public',
+        ];
+        PHPEOF
 
     - name: Setup database
       run: |
         mysql -h 127.0.0.1 -u root -proot planning_poker_test < database.sql
+
+    - name: Set test environment
+      run: echo "APP_ENV=testing" >> $GITHUB_ENV
 
     - name: Run tests
       run: composer test
