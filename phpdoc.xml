@@ -1,38 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<phpdocumentor
-    configVersion="3"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="https://www.phpdoc.org"
-    xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd"
->
-    <title>Planning Poker - Documentation API</title>
+<phpdocumentor>
+    <title>Planning Poker API</title>
     <paths>
         <output>docs</output>
-        <cache>.phpdoc/cache</cache>
     </paths>
-    <version number="1.0.0">
-        <api>
-            <source dsn=".">
-                <path>src</path>
-            </source>
-            <output>docs</output>
-            <ignore hidden="true" symlinks="true">
-                <path>vendor/**</path>
-                <path>tests/**</path>
-                <path>config/**</path>
-                <path>public/**</path>
-                <path>cache/**</path>
-            </ignore>
-            <extensions>
-                <extension>php</extension>
-            </extensions>
-            <default-package-name>App</default-package-name>
-            <markers>
-                <marker>TODO</marker>
-                <marker>FIXME</marker>
-            </markers>
-        </api>
-    </version>
-    <template name="default"/>
-    <setting name="graphs.enabled" value="true"/>
 </phpdocumentor>
