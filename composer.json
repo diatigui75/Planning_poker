@@ -35,7 +35,7 @@
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-html tests/coverage --coverage-clover tests/coverage/clover.xml",
         "test:filter": "phpunit --filter",
-        "docs": "phpdoc",
+        "docs": "phpdoc run --directory src --target docs --title \"Planning Poker API\" --setting=guides.enabled=false --force",
         "cs": "phpcs",
         "cs:fix": "phpcbf",
         "stan": "phpstan analyse",
