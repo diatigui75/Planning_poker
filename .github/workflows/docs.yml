@@ -31,22 +31,29 @@ jobs:
       run: echo "Documentation generation disabled due to PHPDocumentor bug" 
       # run: composer docs
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: 'docs'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
+    # Pages deployment temporairement désactivé
+    # Raison : PHPDocumentor bug + GitHub Pages non configuré
+    # Pour réactiver : 
+    # 1. Activer Pages dans Settings > Pages > Source: GitHub Actions
+    # 2. Décommenter les sections ci-dessous
     
-    steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+    # - name: Setup Pages
+    #   uses: actions/configure-pages@v4
+
+    # - name: Upload artifact
+    #   uses: actions/upload-pages-artifact@v3
+    #   with:
+    #     path: 'docs'
+
+  # Job de déploiement désactivé
+  # deploy:
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   
+  #   steps:
+  #   - name: Deploy to GitHub Pages
+  #     id: deployment
+  #     uses: actions/deploy-pages@v4
