@@ -28,7 +28,8 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Generate documentation
-      run: composer docs
+      run: echo "Documentation generation disabled due to PHPDocumentor bug" 
+      # run: composer docs
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
