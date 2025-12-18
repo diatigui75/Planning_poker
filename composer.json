@@ -26,16 +26,16 @@
         "ext-mbstring": "*"
     },
     "require-dev": {
+        "phpdocumentor/phpdocumentor": "^3.6",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.5",
-        "phpdocumentor/phpdocumentor": "^3.0",
-        "squizlabs/php_codesniffer": "^3.7",
-        "phpstan/phpstan": "^1.10"
+        "squizlabs/php_codesniffer": "^3.7"
     },
     "scripts": {
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-html tests/coverage --coverage-clover tests/coverage/clover.xml",
         "test:filter": "phpunit --filter",
-        "docs": "phpdoc run -d src -t docs --title=\"Planning Poker API\" --setting=guides.enabled=false",
+        "docs": "phpdoc",
         "cs": "phpcs",
         "cs:fix": "phpcbf",
         "stan": "phpstan analyse",
