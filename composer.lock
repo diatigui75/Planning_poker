@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b8374d9621ef6a9455bc07daabda106",
+    "content-hash": "7112a52dfc9bae43fb34898e78ed9512",
     "packages": [],
     "packages-dev": [
         {
@@ -2126,16 +2126,16 @@
         },
         {
             "name": "phpdocumentor/phpdocumentor",
-            "version": "v3.9.1",
+            "version": "v3.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/phpDocumentor.git",
-                "reference": "4d3daedcffb747791b212545da819bfc81252ea9"
+                "reference": "185f45c1ff1b34f85bdaa01e1777ee26c1c6ebfa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/phpDocumentor/zipball/4d3daedcffb747791b212545da819bfc81252ea9",
-                "reference": "4d3daedcffb747791b212545da819bfc81252ea9",
+                "url": "https://api.github.com/repos/phpDocumentor/phpDocumentor/zipball/185f45c1ff1b34f85bdaa01e1777ee26c1c6ebfa",
+                "reference": "185f45c1ff1b34f85bdaa01e1777ee26c1c6ebfa",
                 "shasum": ""
             },
             "require": {
@@ -2166,7 +2166,7 @@
                 "phpdocumentor/guides-markdown": "^1.7",
                 "phpdocumentor/guides-restructured-text": "^1.7",
                 "phpdocumentor/json-path": "^0.2.1",
-                "phpdocumentor/reflection": "^6.4.4",
+                "phpdocumentor/reflection": "^6.3",
                 "phpdocumentor/reflection-common": "^2.0",
                 "phpdocumentor/reflection-docblock": "^5.4",
                 "phpdocumentor/type-resolver": "^1.8",
@@ -2256,9 +2256,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpDocumentor/phpDocumentor/issues",
-                "source": "https://github.com/phpDocumentor/phpDocumentor/tree/v3.9.1"
+                "source": "https://github.com/phpDocumentor/phpDocumentor/tree/v3.9.0"
             },
-            "time": "2025-11-25T21:48:17+00:00"
+            "time": "2025-11-20T06:20:24+00:00"
         },
         {
             "name": "phpdocumentor/reflection",
